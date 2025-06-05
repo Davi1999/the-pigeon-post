@@ -1,0 +1,36 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/myapp
+      - NEXTAUTH_SECRET=your_secret
+      - NEXTAUTH_URL=http://localhost:3000
+      - GITHUB_ID=your_github_id
+      - GITHUB_SECRET=your_github_secret
+    depends_on:
+      - db
+    volumes:
+      - .:/the-pigeon-post
+      - /app/node_modules
+    command: npm run dev  # change to npm start for production
+
+  db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: myapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
