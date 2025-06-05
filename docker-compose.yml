@@ -17,7 +17,7 @@ services:
       - db
     volumes:
       - .:/the-pigeon-post
-      - /app/node_modules
+      - /the-pigeon-post/node_modules
     command: npm run dev  # change to npm start for production
 
   db:
