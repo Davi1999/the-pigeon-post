@@ -11,6 +11,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@material-tailwind/react": "^2.1.10",
     "@repo/ui": "*",
     "@tailwindcss/postcss": "^4.1.8",
     "next": "^15.3.0",
