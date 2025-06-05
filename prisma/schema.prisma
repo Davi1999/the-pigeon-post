@@ -40,14 +40,23 @@ model Profile {
   user      User     @relation(fields: [userId], references: [id])
 }
 
+model Template {
+  id        String    @id @default(uuid())
+  name      String    @unique
+
+  posts Post[]
+}
+
 model Post {
   id        String    @id @default(uuid())
   userId    String
+  templateId String
   title     String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   user      User      @relation(fields: [userId], references: [id])
+  template  Template @relation(fields: [templateId], references: [id])
   blocks    PostBlock[]
   likes     PostLike[]
   conversations PostConversation[]
