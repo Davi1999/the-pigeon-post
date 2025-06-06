@@ -1,7 +1,8 @@
 import NextAuth, { type NextAuthResult } from 'next-auth';
+import GitHub from "next-auth/providers/github"
 
 const result = NextAuth({
-  providers: [],
+  providers: [GitHub],
 });
 
 export const handlers: NextAuthResult['handlers'] = result.handlers;
