@@ -1,7 +1,10 @@
 import NextAuth, { type NextAuthResult } from 'next-auth';
 import GitHub from "next-auth/providers/github"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import { prisma } from "@/lib/prisma"
 
 const result = NextAuth({
+  adapter: PrismaAdapter(prisma),
   providers: [GitHub],
 });
 

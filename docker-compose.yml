@@ -10,7 +10,7 @@ services:
     env_file:
       - ./apps/web/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/myapp
+      - DATABASE_URL=prisma+postgres://postgres:password@db:5432/myapp
       - NEXTAUTH_URL=http://localhost:3000
     depends_on:
       - db

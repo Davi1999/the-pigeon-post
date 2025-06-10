@@ -17,7 +17,7 @@ RUN npm install @next/swc-linux-x64-gnu --save-dev
 RUN turbo run build
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN npx prisma generate --data-proxy
 
 # Disable native SWC to force WASM fallback (avoids your SWC errors)
 ENV NEXT_DISABLE_SWC_NATIVE=true
