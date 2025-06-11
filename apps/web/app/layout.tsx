@@ -1,7 +1,5 @@
-// app/layout.tsx
-
-import "./globals.css"
 import type { Metadata } from "next"
+import "./globals.css"
 
 export const metadata: Metadata = {
   title: "The Pigeon Post",
@@ -25,9 +23,6 @@ export default function RootLayout({
         </head>
       <body>
         <main className="pt-6 px-4 sm:px-6 lg:px-8s">
-            <h1 className="jacquard-24-charted-regular scroll-m-20 text-center text-9xl pb-12">
-                The Pigeon Post
-            </h1>
             {children}
         </main>
       </body>
