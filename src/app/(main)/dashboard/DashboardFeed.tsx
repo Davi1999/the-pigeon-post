@@ -80,24 +80,25 @@ export function DashboardFeed({
   const columns = distributeIntoColumns(posts);
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {columns.map((columnPosts, columnIndex) => (
-        <div
-          key={`column-${columnIndex}`}
-          className="space-y-4 border-gray-200 md:border-none md:pt-0"
-        >
-          {columnPosts.map((post) => (
-            <PostArticle
-              key={post.id}
-              title={post.title}
-              body={post.body}
-              authorDisplayName={post.authorDisplayName}
-              createdAt={new Date(post.createdAt)}
-              isOwnPost={post.isOwnPost}
-            />
-          ))}
-        </div>
-      ))}
+    <div className="dashboard-columns">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {columns.map((columnPosts, columnIndex) => (
+          <div
+            key={`column-${columnIndex}`}
+            className="space-y-4 md:pt-0"
+          >
+            {columnPosts.map((post) => (
+              <PostArticle
+                key={post.id}
+                title={post.title}
+                body={post.body}
+                authorDisplayName={post.authorDisplayName}
+                createdAt={new Date(post.createdAt)}
+                isOwnPost={post.isOwnPost}
+              />
+            ))}
+          </div>
+        ))}
       {nextCursor ? (
         <div
           ref={sentinelRef}
@@ -109,6 +110,7 @@ export function DashboardFeed({
           ) : null}
         </div>
       ) : null}
+      </div>
     </div>
   );
 }

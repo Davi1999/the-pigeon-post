@@ -38,16 +38,13 @@ export default async function DashboardPage() {
   }));
 
   return (
-    <div className="px-4 py-8">
+    <div>
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Masthead */}
-        <header className="border-b border-gray-300 pb-4 text-center">
-          <h1 className="text-3xl font-semibold tracking-[0.25em] uppercase">
-            The Pigeon Post
+        <header className="border-b border-black pb-4 text-center">
+          <h1 className="text-3xl font-semibold tracking-[0.25em] uppercase font-diplomata text-center">
+            Personal Dispatches from You and Your Friends!
           </h1>
-          <p className="mt-2 text-xs uppercase text-gray-500">
-            Personal Dispatches from You and Your Friends
-          </p>
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_260px]">

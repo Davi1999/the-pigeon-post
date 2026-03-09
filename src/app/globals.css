@@ -205,6 +205,45 @@ body {
   column-gap: 0;
 }
 
+.dashboard-columns {
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .dashboard-columns::before,
+  .dashboard-columns::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: #000;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .dashboard-columns::before {
+    left: 50%;
+  }
+
+  .dashboard-columns::after {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-columns::before {
+    /* Center in first gap: column ends at ~33.333% - 1rem, gap center +0.75rem */
+    left: calc(33.333% - 0.25rem - 0.5px);
+  }
+
+  .dashboard-columns::after {
+    display: block;
+    /* Center in second gap: column ends at ~66.666% - 0.5rem, gap center +0.75rem */
+    left: calc(66.666% + 0.25rem - 0.5px);
+  }
+}
+
 .newspaper-column {
   font-size: 0.9rem;
   line-height: 1.5;
@@ -227,6 +266,16 @@ body {
   text-transform: uppercase;
   font-weight: 600;
   margin-bottom: 0.5rem;
+}
+
+.font-notable {
+  font-family: "Notable", "Special Elite",
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", serif;
+}
+
+.font-diplomata {
+  font-family: "Diplomata", "Notable", "Special Elite",
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", serif;
 }
 
 .newspaper-article-tagline {
