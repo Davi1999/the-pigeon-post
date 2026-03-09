@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/lib/auth";
@@ -66,9 +67,12 @@ export default async function RootLayout({
                   </div>
                 </div>
                 <div className="newspaper-header-center">
-                  <div className="newspaper-masthead text-4xl sm:text-5xl md:text-6xl">
+                  <Link
+                    href="/dashboard"
+                    className="newspaper-masthead text-4xl sm:text-5xl md:text-6xl hover:opacity-90 transition-opacity"
+                  >
                     The Pigeon Post
-                  </div>
+                  </Link>
                 </div>
                 <div className="newspaper-header-side">
                   <div className="newspaper-welcome-box">

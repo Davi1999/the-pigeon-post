@@ -3,6 +3,32 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { posts } from "@/db/schema";
+import { getFeedPostsPage } from "@/lib/feed";
+
+export async function GET(request: Request) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const limitParam = searchParams.get("limit");
+  const limit = limitParam ? Math.min(parseInt(limitParam, 10) || 12, 50) : 12;
+  const cursor = searchParams.get("cursor") ?? undefined;
+
+  const { posts: feedPosts, nextCursor } = await getFeedPostsPage(
+    session.user.id,
+    { limit, cursor: cursor || null },
+  );
+
+  return NextResponse.json({
+    posts: feedPosts,
+    nextCursor,
+  });
+}
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({

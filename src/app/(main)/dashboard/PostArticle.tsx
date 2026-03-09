@@ -1,0 +1,50 @@
+// src/app/(main)/dashboard/PostArticle.tsx
+
+type PostArticleProps = {
+  title: string;
+  body: string;
+  authorDisplayName: string;
+  createdAt: Date;
+  isOwnPost: boolean;
+};
+
+function formatDate(date: Date) {
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(date);
+  } catch {
+    return "";
+  }
+}
+
+export function PostArticle({
+  title,
+  body,
+  authorDisplayName,
+  createdAt,
+  isOwnPost,
+}: PostArticleProps) {
+  const displayTitle = title || "Untitled story";
+  const dateLabel = formatDate(createdAt);
+
+  return (
+    <article className="space-y-1 border-b border-gray-200 pb-3 text-xs leading-relaxed last:border-b-0">
+      <header className="space-y-0.5">
+        <h2 className="text-sm font-semibold uppercase tracking-wide">
+          {displayTitle}
+        </h2>
+        <p className="text-[10px] uppercase tracking-wide text-gray-500">
+          {isOwnPost ? "By You" : `By ${authorDisplayName}`}
+          {dateLabel ? ` — ${dateLabel}` : null}
+        </p>
+      </header>
+      <p className="mt-1 whitespace-pre-wrap text-[11px] text-gray-800">
+        {body}
+      </p>
+    </article>
+  );
+}
+

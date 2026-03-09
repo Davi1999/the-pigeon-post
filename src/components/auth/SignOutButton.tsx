@@ -4,6 +4,7 @@
 
 import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth-client";
+import { Button } from "@/components/ui/Button";
 
 export function SignOutButton() {
   const router = useRouter();
@@ -15,12 +16,8 @@ export function SignOutButton() {
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => handleSignOut()}
-      className="rounded-md border border-foreground/20 bg-transparent px-3 py-1.5 text-sm font-medium text-foreground hover:bg-foreground/5"
-    >
+    <Button variant="secondary" size="sm" onClick={() => handleSignOut()}>
       Sign out
-    </button>
+    </Button>
   );
 }
