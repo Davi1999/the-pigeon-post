@@ -37,6 +37,7 @@ export default async function RootLayout({
 
   const today = new Date();
   const dateLine = today.toLocaleDateString("en-US", {
+    weekday: "long",
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -101,7 +102,7 @@ export default async function RootLayout({
               </div>
             </div>
           </header>
-          <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+          <main className="mx-auto max-w-6xl">{children}</main>
         </div>
       </body>
     </html>

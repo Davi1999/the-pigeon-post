@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Special+Elite&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Manufacturing+Consent&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Notable&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Diplomata&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -149,4 +151,190 @@ body {
   font-size: 9px;
   letter-spacing: 0.03em;
   font-weight: 400;
+}
+
+/* Main front-page headline (below masthead) */
+
+.newspaper-main-headline-section {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.newspaper-main-headline {
+  margin: 0;
+  padding: 0;
+  display: block;
+  width: 100%;
+}
+
+.newspaper-main-headline-svg {
+  display: block;
+  width: 100%;
+  height: 1.15em;
+  min-height: 2.5rem;
+}
+
+.newspaper-main-headline-svg-text {
+  font-family: "Diplomata", "Notable", "Special Elite",
+    system-ui, serif;
+  font-size: 8px;
+  fill: var(--foreground);
+}
+
+.newspaper-main-headline-line {
+  display: block;
+}
+
+.newspaper-main-headline-rules {
+  margin-top: 0.5rem;
+}
+
+.newspaper-main-headline-rules .newspaper-divider-line {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.newspaper-main-headline-rules .newspaper-divider-line + .newspaper-divider-line {
+  margin-top: 2px;
+}
+
+
+.newspaper-columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 0;
+}
+
+.newspaper-column {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: left;
+  padding: 0 0.75rem;
+}
+
+.newspaper-column + .newspaper-column {
+  border-left: 1px solid var(--divider-line);
+}
+
+.newspaper-article-headline {
+  font-family: "Notable", "Special Elite",
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", serif;
+  font-size: 1.15rem;
+  text-align: center;
+  text-justify: inter-word;
+  hyphens: auto;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.newspaper-article-tagline {
+  font-size: 0.7rem;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--divider-text);
+  margin-bottom: 0.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.75rem;
+  position: relative;
+}
+
+.newspaper-article-tagline::before,
+.newspaper-article-tagline::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10%;
+  border-top: 1px solid var(--divider-line);
+}
+
+.newspaper-article-tagline::before {
+  top: 0;
+}
+
+.newspaper-article-tagline::after {
+  bottom: 0;
+}
+
+.newspaper-article-body {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  font-size: 0.8rem;
+  margin-bottom: 0.65rem;
+}
+
+.newspaper-auth-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.newspaper-auth-box {
+  margin-top: 1.25rem;
+  padding: 0.85rem 0.9rem 1rem;
+  border: 1px solid var(--divider-border);
+  background-color: var(--background);
+}
+
+.newspaper-auth-heading {
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.newspaper-auth-subtext {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--divider-text);
+}
+
+.newspaper-auth-link {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.newspaper-auth-link:hover {
+  text-decoration: none;
+}
+
+@media (max-width: 1024px) {
+  .newspaper-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 2rem;
+  }
+
+  .newspaper-column + .newspaper-column {
+    border-left: none;
+  }
+
+  .newspaper-columns > .newspaper-column:nth-child(odd) {
+    border-right: 1px solid var(--divider-line);
+  }
+}
+
+@media (max-width: 640px) {
+  .newspaper-columns {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 1.75rem;
+  }
+
+  .newspaper-columns > .newspaper-column {
+    border-right: none;
+    border-left: none;
+    border-top: 1px solid var(--divider-line);
+    padding-top: 1rem;
+  }
+
+  .newspaper-columns > .newspaper-column:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
 }
