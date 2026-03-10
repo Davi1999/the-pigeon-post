@@ -44,6 +44,90 @@ export type GetFeedPostsPageResult = {
   nextCursor: string | null;
 };
 
+export async function getPostForUser(
+  currentUserId: string,
+  postId: string,
+): Promise<FeedPost | null> {
+  const acceptedFriendships = await db
+    .select({
+      id: friendRequests.id,
+      senderId: friendRequests.senderId,
+      receiverId: friendRequests.receiverId,
+    })
+    .from(friendRequests)
+    .where(
+      and(
+        eq(friendRequests.status, "accepted"),
+        or(
+          eq(friendRequests.senderId, currentUserId),
+          eq(friendRequests.receiverId, currentUserId),
+        ),
+      ),
+    );
+
+  const friendUserIds = acceptedFriendships.map((friendship) =>
+    friendship.senderId === currentUserId
+      ? friendship.receiverId
+      : friendship.senderId,
+  );
+
+  const authorIds = [currentUserId, ...friendUserIds];
+
+  if (authorIds.length === 0) {
+    return null;
+  }
+
+  const [post] =
+    (await db
+      .select({
+        id: posts.id,
+        authorId: posts.authorId,
+        content: posts.content,
+        createdAt: posts.createdAt,
+        authorName: userTable.name,
+        authorEmail: userTable.email,
+      })
+      .from(posts)
+      .innerJoin(userTable, eq(posts.authorId, userTable.id))
+      .where(and(eq(posts.id, postId), inArray(posts.authorId, authorIds)))
+      .limit(1)) ?? [];
+
+  if (!post) {
+    return null;
+  }
+
+  let title = "";
+  let body = "";
+
+  try {
+    const parsed = JSON.parse(post.content) as {
+      title?: string;
+      body?: string;
+    };
+    title = parsed.title ?? "";
+    body = parsed.body ?? "";
+  } catch {
+    body = post.content;
+  }
+
+  const isOwnPost = post.authorId === currentUserId;
+  const authorDisplayName =
+    isOwnPost || !post.authorName
+      ? isOwnPost
+        ? "You"
+        : post.authorEmail
+      : post.authorName;
+
+  return {
+    id: post.id,
+    title,
+    body,
+    authorDisplayName,
+    createdAt: post.createdAt,
+    isOwnPost,
+  };
+}
+
 export async function getFeedPostsPage(
   currentUserId: string,
   options: GetFeedPostsPageOptions = {},
