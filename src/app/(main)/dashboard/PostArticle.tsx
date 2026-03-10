@@ -1,10 +1,14 @@
+import { LetterButton } from "@/components/LetterButton";
+
 type PostArticleProps = {
+  postId: string;
   title: string;
   body: string;
   authorDisplayName: string;
   createdAt: Date;
   isOwnPost: boolean;
   continuedFromTitle?: string | null;
+  showContinueButton?: boolean;
 };
 
 function formatDate(date: Date) {
@@ -20,12 +24,14 @@ function formatDate(date: Date) {
 }
 
 export function PostArticle({
+  postId,
   title,
   body,
   authorDisplayName,
   createdAt,
   isOwnPost,
   continuedFromTitle,
+  showContinueButton = true,
 }: PostArticleProps) {
   const displayTitle = title || "Untitled story";
   const dateLabel = formatDate(createdAt);
@@ -54,6 +60,15 @@ export function PostArticle({
       <p className="post-article-body mt-1 whitespace-pre-wrap text-[11px] text-justify">
         {body}
       </p>
+      {showContinueButton && (
+        <div className="mt-3 flex justify-center">
+          <LetterButton
+            href={`/post/${postId}`}
+            label="Continue conversation"
+            ariaLabel={`Continue conversation about ${displayTitle}`}
+          />
+        </div>
+      )}
     </article>
   );
 }

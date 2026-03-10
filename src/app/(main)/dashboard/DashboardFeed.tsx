@@ -173,6 +173,7 @@ export function DashboardFeed({
             ? currentPageContent.items.map((item, idx) => (
                 <PostArticle
                   key={`${item.postId}-${idx}`}
+                  postId={item.postId}
                   title={item.title}
                   body={item.bodyText}
                   authorDisplayName={item.authorDisplayName}
@@ -255,6 +256,7 @@ export function DashboardFeed({
       {posts.map((post) => (
         <PostArticle
           key={post.id}
+          postId={post.id}
           title={post.title}
           body={post.body}
           authorDisplayName={post.authorDisplayName}
