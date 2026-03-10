@@ -1,5 +1,3 @@
-// src/app/(main)/dashboard/page.tsx
-
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -37,6 +35,60 @@ export default async function DashboardPage() {
     createdAt: p.createdAt.toISOString(),
   }));
 
+  const sidebarContent = (
+    <>
+      <h2 className="text-base font-semibold uppercase tracking-wide text-center font-notable">
+        Edition Options
+      </h2>
+      <div className="mt-1 flex flex-col items-center gap-0.5 pb-2 pt-2">
+        <div className="h-px w-8 bg-black" />
+        <p className="text-[10px] uppercase tracking-wide text-gray-500 text-center p-2">
+          Work on your edition.
+        </p>
+        <div className="h-px w-8 bg-black" />
+        <p className="mt-1 whitespace-pre-wrap text-[11px] text-gray-800 text-justify">
+          This is where you can contribute to the Pigeon Post. Add your friends,
+          write your articles, and more. A great place to start is by creating a
+          new post. Take the time to write something meaningful, and share it
+          with your friends. Once you&apos;ve created a post, you can add your
+          friends, read their posts, and start conversations.
+        </p>
+      </div>
+      <nav className="space-y-2">
+        <Link
+          href="/new-post"
+          className={buttonVariants({
+            variant: "primary",
+            block: true,
+          })}
+        >
+          Create new post
+        </Link>
+        <Link
+          href="/add-friends"
+          className={buttonVariants({
+            variant: "secondary",
+            block: true,
+          })}
+        >
+          Add friends
+        </Link>
+      </nav>
+
+      <section className="space-y-3 border bg-background px-4 py-3">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+          Account
+        </h2>
+        <div className="flex items-center justify-between text-xs text-gray-600">
+          <span className="truncate">{user.email}</span>
+        </div>
+        <div className="pt-1">
+          <SignOutButton />
+        </div>
+      </section>
+    </>
+  );
+
   return (
     <div>
       <div className="mx-auto max-w-6xl space-y-6">
@@ -47,15 +99,15 @@ export default async function DashboardPage() {
           </h1>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_1px_minmax(0,1fr)]">
-          {/* Columns 1–3: Feed */}
-          <div className="lg:col-span-3">
-            {hasPosts ? (
-              <DashboardFeed
-                initialPosts={serializedInitialPosts}
-                initialNextCursor={initialNextCursor}
-              />
-            ) : (
+        {hasPosts ? (
+          <DashboardFeed
+            initialPosts={serializedInitialPosts}
+            initialNextCursor={initialNextCursor}
+            sidebarContent={sidebarContent}
+          />
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_1px_minmax(0,1fr)]">
+            <div className="lg:col-span-3">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="md:col-span-2 lg:col-span-3">
                   <div className="space-y-3 border border-dashed bg-gray-50 px-4 py-6 text-center text-sm text-gray-700">
@@ -89,66 +141,15 @@ export default async function DashboardPage() {
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Vertical line between feed and sidebar */}
-          <div className="hidden bg-black lg:block" aria-hidden />
-
-          {/* Column 4: Links & options */}
-          <aside className="space-y-4 border-t pt-4 text-sm md:border-none md:pt-0">
-            <h2 className="text-base font-semibold uppercase tracking-wide text-center font-notable">
-              Edition Options
-            </h2>
-            <div className="mt-1 flex flex-col items-center gap-0.5 pb-2 pt-2">
-              <div className="h-px w-8 bg-black" />
-              <p className="text-[10px] uppercase tracking-wide text-gray-500 text-center p-2">
-                Work on your edition.
-              </p>
-              <div className="h-px w-8 bg-black" />
-              <p className="mt-1 whitespace-pre-wrap text-[11px] text-gray-800 text-justify">
-                This is where you can contribute to the Pigeon Post. Add your
-                friends, write your articles, and more. A great place to start
-                is by creating a new post. Take the time to write something
-                meaningful, and share it with your friends. Once you've created
-                a post, you can add your friends, read their posts, and start
-                conversations.
-              </p>
             </div>
-            <nav className="space-y-2">
-              <Link
-                href="/new-post"
-                className={buttonVariants({
-                  variant: "primary",
-                  block: true,
-                })}
-              >
-                Create new post
-              </Link>
-              <Link
-                href="/add-friends"
-                className={buttonVariants({
-                  variant: "secondary",
-                  block: true,
-                })}
-              >
-                Add friends
-              </Link>
-            </nav>
 
-            <section className="space-y-3 border bg-background px-4 py-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Account
-              </h2>
-              <div className="flex items-center justify-between text-xs text-gray-600">
-                <span className="truncate">{user.email}</span>
-              </div>
-              <div className="pt-1">
-                <SignOutButton />
-              </div>
-            </section>
-          </aside>
-        </div>
+            <div className="hidden bg-black lg:block" aria-hidden />
+
+            <aside className="space-y-4 border-t pt-4 text-sm md:border-none md:pt-0">
+              {sidebarContent}
+            </aside>
+          </div>
+        )}
       </div>
     </div>
   );

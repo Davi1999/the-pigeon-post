@@ -1,11 +1,10 @@
-// src/app/(main)/dashboard/PostArticle.tsx
-
 type PostArticleProps = {
   title: string;
   body: string;
   authorDisplayName: string;
   createdAt: Date;
   isOwnPost: boolean;
+  continuedFromTitle?: string | null;
 };
 
 function formatDate(date: Date) {
@@ -26,29 +25,35 @@ export function PostArticle({
   authorDisplayName,
   createdAt,
   isOwnPost,
+  continuedFromTitle,
 }: PostArticleProps) {
   const displayTitle = title || "Untitled story";
   const dateLabel = formatDate(createdAt);
 
   return (
     <article className="space-y-1 border-b border-black pb-3 text-xs leading-relaxed last:border-b-0">
-      <header className="space-y-0.5">
-        <h2 className="text-base font-semibold uppercase tracking-wide text-center font-notable">
-          {displayTitle}
-        </h2>
-        <div className="mt-1 flex flex-col items-center gap-0.5 pb-2 pt-2">
-          <div className="h-px w-8 bg-black" />
-          <p className="text-[10px] uppercase tracking-wide text-gray-500 text-center p-2">
-            {isOwnPost ? "By You" : `By ${authorDisplayName}`}
-            {dateLabel ? ` — ${dateLabel}` : null}
-          </p>
-          <div className="h-px w-8 bg-black" />
+      {continuedFromTitle ? (
+        <div className="continued-from-tag">
+          Continued from &ldquo;{continuedFromTitle}&rdquo;
         </div>
-      </header>
+      ) : (
+        <header className="space-y-0.5" style={{ breakInside: "avoid" }}>
+          <h2 className="text-base font-semibold uppercase tracking-wide text-center font-notable">
+            {displayTitle}
+          </h2>
+          <div className="mt-1 flex flex-col items-center gap-0.5 pb-2 pt-2">
+            <div className="h-px w-8 bg-black" />
+            <p className="text-[10px] uppercase tracking-wide text-gray-500 text-center p-2">
+              {isOwnPost ? "By You" : `By ${authorDisplayName}`}
+              {dateLabel ? ` — ${dateLabel}` : null}
+            </p>
+            <div className="h-px w-8 bg-black" />
+          </div>
+        </header>
+      )}
       <p className="mt-1 whitespace-pre-wrap text-[11px] text-gray-800 text-justify">
         {body}
       </p>
     </article>
   );
 }
-

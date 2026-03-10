@@ -387,3 +387,32 @@ body {
     padding-top: 0;
   }
 }
+
+/* Newspaper paged layout (desktop) */
+
+.newspaper-paged-columns {
+  column-count: 3;
+  column-gap: 1.5rem;
+  column-fill: auto;
+  column-rule: 1px solid var(--divider-line);
+}
+
+.newspaper-paged-columns > article {
+  margin-bottom: 1rem;
+}
+
+.newspaper-paged-columns > article:last-child {
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+
+.continued-from-tag {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-style: italic;
+  text-align: center;
+  padding: 4px 0 6px;
+  color: var(--divider-text);
+  break-inside: avoid;
+}
