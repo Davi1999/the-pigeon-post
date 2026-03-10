@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useState, useLayoutEffect } from "react
 import { PostArticle } from "./PostArticle";
 import { computeNewspaperLayout, type PageContent } from "./newspaperLayout";
 import { useIsDesktop } from "./useIsDesktop";
+import { EditionOptionsAccordion } from "./EditionOptionsAccordion";
 
 export type FeedPostSerialized = {
   id: string;
@@ -37,6 +38,7 @@ export function DashboardFeed({
   const [pages, setPages] = useState<PageContent[]>([]);
   const [pageHeight, setPageHeight] = useState(0);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [accordionOpen, setAccordionOpen] = useState(false);
 
   const feedContainerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -184,11 +186,11 @@ export function DashboardFeed({
             : null}
         </div>
 
-        <div className="hidden bg-black lg:block" aria-hidden />
+        <div className="hidden bg-black dark:bg-[#f5ecd8] lg:block" aria-hidden />
 
         <aside ref={sidebarRef} className="space-y-4 text-sm">
           <nav
-            className="flex flex-col items-center gap-6 border-b border-black pb-3"
+            className="flex flex-col items-center gap-6 border-b border-black dark:border-[#f5ecd8] pb-3"
             aria-label="Page navigation"
           >
             {(currentPage > 0 || currentPage < totalPages - 1) && (
@@ -244,6 +246,12 @@ export function DashboardFeed({
   // Mobile / tablet: single-column infinite scroll
   return (
     <div className="space-y-4">
+      <EditionOptionsAccordion
+        open={accordionOpen}
+        onToggle={() => setAccordionOpen((o) => !o)}
+      >
+        {sidebarContent}
+      </EditionOptionsAccordion>
       {posts.map((post) => (
         <PostArticle
           key={post.id}
@@ -261,9 +269,6 @@ export function DashboardFeed({
           ) : null}
         </div>
       ) : null}
-      <aside className="space-y-4 border-t pt-4 text-sm">
-        {sidebarContent}
-      </aside>
     </div>
   );
 }

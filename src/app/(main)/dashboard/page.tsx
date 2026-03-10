@@ -6,6 +6,7 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { buttonVariants } from "@/components/ui/Button";
 import { getFeedPostsPage } from "@/lib/feed";
 import { DashboardFeed } from "./DashboardFeed";
+import { DashboardEmptyState } from "./DashboardEmptyState";
 
 const INITIAL_PAGE_SIZE = 12;
 
@@ -106,49 +107,37 @@ export default async function DashboardPage() {
             sidebarContent={sidebarContent}
           />
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_1px_minmax(0,1fr)]">
-            <div className="lg:col-span-3">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div className="md:col-span-2 lg:col-span-3">
-                  <div className="space-y-3 border border-dashed bg-gray-50 px-4 py-6 text-center text-sm text-gray-700">
-                    <p className="text-base font-semibold uppercase tracking-wide">
-                      No stories on your front page yet
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Start your edition of The Pigeon Post by writing your
-                      first article or adding a friend.
-                    </p>
-                    <div className="mt-4 flex flex-wrap justify-center gap-3">
-                      <Link
-                        href="/new-post"
-                        className={buttonVariants({
-                          variant: "primary",
-                          size: "sm",
-                        })}
-                      >
-                        Write a new story
-                      </Link>
-                      <Link
-                        href="/add-friends"
-                        className={buttonVariants({
-                          variant: "secondary",
-                          size: "sm",
-                        })}
-                      >
-                        Add friends
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+          <DashboardEmptyState sidebarContent={sidebarContent}>
+            <div className="space-y-3 border border-dashed bg-gray-50 px-4 py-6 text-center text-sm text-gray-700">
+              <p className="text-base font-semibold uppercase tracking-wide">
+                No stories on your front page yet
+              </p>
+              <p className="text-xs text-gray-500">
+                Start your edition of The Pigeon Post by writing your
+                first article or adding a friend.
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-3">
+                <Link
+                  href="/new-post"
+                  className={buttonVariants({
+                    variant: "primary",
+                    size: "sm",
+                  })}
+                >
+                  Write a new story
+                </Link>
+                <Link
+                  href="/add-friends"
+                  className={buttonVariants({
+                    variant: "secondary",
+                    size: "sm",
+                  })}
+                >
+                  Add friends
+                </Link>
               </div>
             </div>
-
-            <div className="hidden bg-black dark:bg-[#f5ecd8] lg:block" aria-hidden />
-
-            <aside className="space-y-4 border-t pt-4 text-sm md:border-none md:pt-0">
-              {sidebarContent}
-            </aside>
-          </div>
+          </DashboardEmptyState>
         )}
       </div>
     </div>
