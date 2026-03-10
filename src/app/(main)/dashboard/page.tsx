@@ -41,12 +41,12 @@ export default async function DashboardPage() {
         Edition Options
       </h2>
       <div className="mt-1 flex flex-col items-center gap-0.5 pb-2 pt-2">
-        <div className="h-px w-8 bg-black" />
+        <div className="h-px w-8 bg-black dark:bg-[#f5ecd8]" />
         <p className="text-[10px] uppercase tracking-wide text-gray-500 text-center p-2">
           Work on your edition.
         </p>
-        <div className="h-px w-8 bg-black" />
-        <p className="mt-1 whitespace-pre-wrap text-[11px] text-gray-800 text-justify">
+        <div className="h-px w-8 bg-black dark:bg-[#f5ecd8]" />
+        <p className="post-article-body mt-1 whitespace-pre-wrap text-[11px] text-justify">
           This is where you can contribute to the Pigeon Post. Add your friends,
           write your articles, and more. A great place to start is by creating a
           new post. Take the time to write something meaningful, and share it
@@ -93,7 +93,7 @@ export default async function DashboardPage() {
     <div>
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Masthead */}
-        <header className="border-b border-black pb-4 text-center">
+        <header className="border-b border-black dark:border-[#f5ecd8] pb-4 text-center">
           <h1 className="text-3xl font-semibold tracking-[0.25em] uppercase font-diplomata text-center">
             Personal Dispatches from You and Your Friends!
           </h1>
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            <div className="hidden bg-black lg:block" aria-hidden />
+            <div className="hidden bg-black dark:bg-[#f5ecd8] lg:block" aria-hidden />
 
             <aside className="space-y-4 border-t pt-4 text-sm md:border-none md:pt-0">
               {sidebarContent}

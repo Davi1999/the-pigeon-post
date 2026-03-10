@@ -191,40 +191,48 @@ export function DashboardFeed({
             className="flex flex-col items-center gap-6 border-b border-black pb-3"
             aria-label="Page navigation"
           >
-            {currentPage > 0 ? (
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-                className="flex flex-col items-center gap-1 text-xs uppercase tracking-wider font-semibold text-black hover:opacity-70 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 rounded-sm"
-                aria-label="Previous page"
-              >
-                <span>Previous page</span>
-                <img
-                  src="/pointing-hand.svg"
-                  alt=""
-                  className="h-6 w-auto scale-x-[-1]"
-                  aria-hidden
-                />
-              </button>
-            ) : null}
-            {currentPage < totalPages - 1 ? (
-              <button
-                type="button"
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
-                }
-                className="flex flex-col items-center gap-1 text-xs uppercase tracking-wider font-semibold text-black hover:opacity-70 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 rounded-sm"
-                aria-label="Continue reading"
-              >
-                <span>Continue reading</span>
-                <img
-                  src="/pointing-hand.svg"
-                  alt=""
-                  className="h-6 w-auto"
-                  aria-hidden
-                />
-              </button>
-            ) : null}
+            {(currentPage > 0 || currentPage < totalPages - 1) && (
+              <div className="inline-flex overflow-hidden border border-black/40 bg-[#f5ecd8] shadow-sm">
+                {currentPage > 0 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage((p) => Math.max(0, p - 1))
+                    }
+                    className="flex flex-col items-center gap-1 px-4 py-2 text-xs uppercase tracking-wider font-semibold text-black border-black/30 hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5ecd8]"
+                    aria-label="Previous page"
+                  >
+                    <span>Previous page</span>
+                    <img
+                      src="/pointing-hand.svg"
+                      alt=""
+                      className="h-9 w-auto scale-x-[-1]"
+                      aria-hidden
+                    />
+                  </button>
+                )}
+                {currentPage < totalPages - 1 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage((p) =>
+                        Math.min(totalPages - 1, p + 1),
+                      )
+                    }
+                    className="flex flex-col items-center gap-1 px-4 py-2 text-xs uppercase tracking-wider font-semibold text-black hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5ecd8]"
+                    aria-label="Continue reading"
+                  >
+                    <span>Continue reading</span>
+                    <img
+                      src="/pointing-hand.svg"
+                      alt=""
+                      className="h-9 w-auto"
+                      aria-hidden
+                    />
+                  </button>
+                )}
+              </div>
+            )}
           </nav>
 
           {sidebarContent}

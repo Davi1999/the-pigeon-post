@@ -406,6 +406,16 @@ body {
   border-bottom: 0;
 }
 
+.post-article-body {
+  color: #222222;
+}
+
+@media (prefers-color-scheme: dark) {
+  .post-article-body {
+    color: #f5ecd8;
+  }
+}
+
 .continued-from-tag {
   font-size: 10px;
   text-transform: uppercase;
