@@ -42,9 +42,11 @@ export function LetterButton(props: LetterButtonProps) {
     "inline-flex overflow-hidden border border-black/40 bg-[#f5ecd8] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5ecd8]";
 
   if ("href" in props) {
+    const { href } = props as LinkProps;
+
     return (
       <Link
-        href={props.href}
+        href={href}
         className={containerClasses}
         aria-label={ariaLabel ?? label}
       >
