@@ -2,11 +2,11 @@ import "server-only";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-// TODO: Use provider CA cert (e.g. DATABASE_CA_CERT) with ssl: { ca } and keep
-// rejectUnauthorized true for proper server verification instead of disabling it.
+const isLocal = process.env.DATABASE_URL?.includes("localhost");
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
-  ssl: { rejectUnauthorized: false },
+  ssl: isLocal ? false : { rejectUnauthorized: false },
 });
 
 export const db = drizzle(pool);
