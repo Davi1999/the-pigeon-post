@@ -13,6 +13,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.0",
+    "@vercel/speed-insights": "^2.0.0",
     "better-auth": "^1.5.4",
     "drizzle-orm": "^0.45.1",
     "next": "16.1.6",
