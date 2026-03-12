@@ -8,6 +8,13 @@
       "when": 1772998442128,
       "tag": "0000_windy_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773324491353,
+      "tag": "0001_groovy_maverick",
+      "breakpoints": true
     }
   ]
 }

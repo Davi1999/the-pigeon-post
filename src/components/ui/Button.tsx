@@ -5,7 +5,7 @@ const base =
 
 const variants = {
   primary:
-    "border-foreground bg-foreground text-background hover:bg-foreground/90",
+    "border-foreground bg-foreground/10 text-foreground hover:bg-transparent",
   secondary:
     "border-foreground/40 bg-transparent text-foreground hover:bg-foreground/5",
 } as const;

@@ -39,7 +39,7 @@ import {
         .notNull(),
       deletedAt: timestamp("deleted_at"),
     },
-    (t) => [index("posts_author_id_idx").on(t.authorId)]
+    (t) => [index("posts_author_id_idx").on(t.authorId)],
   );
   
   // ---------------------------------------------------------------------------
@@ -69,7 +69,7 @@ import {
     (t) => [
       index("comments_post_id_idx").on(t.postId),
       index("comments_author_id_idx").on(t.authorId),
-    ]
+    ],
   );
   
   // ---------------------------------------------------------------------------
@@ -97,7 +97,62 @@ import {
       // Prevent duplicate A→B requests
       uniqueIndex("friend_requests_pair_idx").on(t.senderId, t.receiverId),
       index("friend_requests_receiver_id_idx").on(t.receiverId),
-    ]
+    ],
+  );
+  
+  // ---------------------------------------------------------------------------
+  // Site Updates
+  // ---------------------------------------------------------------------------
+  
+  export const siteUpdates = pgTable("site_updates", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  });
+  
+  // ---------------------------------------------------------------------------
+  // Feature Requests
+  // ---------------------------------------------------------------------------
+  
+  export const featureRequests = pgTable(
+    "feature_requests",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      authorId: text("author_id")
+        .notNull()
+        .references(() => user.id, { onDelete: "cascade" }),
+      title: text("title").notNull(),
+      description: text("description").notNull(),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (t) => [index("feature_requests_created_at_idx").on(t.createdAt)],
+  );
+  
+  // ---------------------------------------------------------------------------
+  // Feature Request Likes
+  // ---------------------------------------------------------------------------
+  
+  export const featureRequestLikes = pgTable(
+    "feature_request_likes",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      requestId: uuid("request_id")
+        .notNull()
+        .references(() => featureRequests.id, { onDelete: "cascade" }),
+      userId: text("user_id")
+        .notNull()
+        .references(() => user.id, { onDelete: "cascade" }),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (t) => [
+      uniqueIndex("feature_request_likes_request_user_idx").on(
+        t.requestId,
+        t.userId,
+      ),
+      index("feature_request_likes_request_idx").on(t.requestId),
+      index("feature_request_likes_user_idx").on(t.userId),
+    ],
   );
   
   // ---------------------------------------------------------------------------
@@ -112,6 +167,8 @@ import {
     comments: many(comments),
     sentFriendRequests: many(friendRequests, { relationName: "sender" }),
     receivedFriendRequests: many(friendRequests, { relationName: "receiver" }),
+    featureRequests: many(featureRequests),
+    featureRequestLikes: many(featureRequestLikes),
   }));
   
   export const postRelations = relations(posts, ({ one, many }) => ({
@@ -142,3 +199,28 @@ import {
       relationName: "receiver",
     }),
   }));
+  
+  export const featureRequestRelations = relations(
+    featureRequests,
+    ({ one, many }) => ({
+      author: one(user, {
+        fields: [featureRequests.authorId],
+        references: [user.id],
+      }),
+      likes: many(featureRequestLikes),
+    }),
+  );
+  
+  export const featureRequestLikeRelations = relations(
+    featureRequestLikes,
+    ({ one }) => ({
+      request: one(featureRequests, {
+        fields: [featureRequestLikes.requestId],
+        references: [featureRequests.id],
+      }),
+      user: one(user, {
+        fields: [featureRequestLikes.userId],
+        references: [user.id],
+      }),
+    }),
+  );

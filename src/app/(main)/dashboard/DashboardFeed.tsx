@@ -191,7 +191,7 @@ export function DashboardFeed({
 
         <aside ref={sidebarRef} className="space-y-4 text-sm">
           <nav
-            className="flex flex-col items-center gap-6 border-b border-black dark:border-[#f5ecd8] pb-3"
+            className="flex flex-col items-center gap-6 pb-3"
             aria-label="Page navigation"
           >
             {(currentPage > 0 || currentPage < totalPages - 1) && (
