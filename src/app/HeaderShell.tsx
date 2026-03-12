@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useIsDesktop } from "./(main)/dashboard/useIsDesktop";
 
 type HeaderShellProps = {
@@ -16,16 +15,12 @@ export function HeaderShell({
   dateLine,
 }: HeaderShellProps) {
   const isDesktop = useIsDesktop();
-  const pathname = usePathname();
-
-  const isDashboard = pathname.startsWith("/dashboard");
-  const showSideBoxes = isDesktop && isDashboard;
 
   return (
     <header className="newspaper-header px-4 py-6">
       <div className="mx-auto max-w-6xl">
         <div className="newspaper-header-row">
-          {showSideBoxes ? (
+          {isDesktop ? (
             <div className="newspaper-header-side">
               <div className="newspaper-welcome-box">
                 {session ? (
@@ -52,7 +47,7 @@ export function HeaderShell({
               The Pigeon Post
             </Link>
           </div>
-          {showSideBoxes ? (
+          {isDesktop ? (
             <div className="newspaper-header-side">
               <div className="newspaper-welcome-box">
                 <div className="newspaper-welcome-text">Weather</div>
@@ -71,7 +66,7 @@ export function HeaderShell({
         <div className="newspaper-divider">
           <div className="newspaper-divider-line" />
           <div className="newspaper-divider-line" />
-          {showSideBoxes ? (
+          {isDesktop ? (
             <div className="grid grid-cols-3 items-center">
               <div className="newspaper-divider-text text-left">
                 Fostering meaningful connections since 2026
