@@ -129,6 +129,83 @@ export function PostCommentsSection({
     return map;
   }, [orderedComments]);
 
+  function renderCommentThread(
+    comment: SerializableComment,
+    isTopLevel: boolean,
+  ) {
+    const replies = repliesByParentId.get(comment.id) ?? [];
+    const createdAt = new Date(comment.createdAt);
+    const dateLabel = createdAt.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    return (
+      <article
+        key={comment.id}
+        className={
+          isTopLevel
+            ? "space-y-2 border-b border-black/40 pb-3 last:border-b-0"
+            : "space-y-1"
+        }
+      >
+        {comment.replySnippet ? (
+          <p className="text-[10px] uppercase tracking-wide text-gray-500">
+            Responding to: &ldquo;{comment.replySnippet}&rdquo;
+          </p>
+        ) : null}
+        <header className="space-y-0.5">
+          <p className="text-[10px] uppercase tracking-wide text-gray-500 text-center">
+            {`By ${comment.authorDisplayName}`}
+            {dateLabel ? ` — ${dateLabel}` : null}
+          </p>
+        </header>
+        <p className="post-article-body mt-1 whitespace-pre-wrap text-[11px] text-justify">
+          {comment.content}
+        </p>
+
+        <div className="mt-2 flex justify-center">
+          <LetterButton
+            label="Respond to comment"
+            size="small"
+            onClick={() => {
+              setArticleFormOpen(false);
+              setReplyingToId((current) =>
+                current === comment.id ? null : comment.id,
+              );
+            }}
+            ariaLabel={`Respond to comment by ${comment.authorDisplayName}${
+              comment.replySnippet
+                ? `, responding to ${comment.replySnippet}`
+                : ""
+            }`}
+          />
+        </div>
+
+        {replyingToId === comment.id ? (
+          <CommentForm
+            label={`Responding to ${comment.authorDisplayName}`}
+            autoFocus
+            onSubmit={async (content) => {
+              await createComment(content, comment.id);
+              setReplyingToId(null);
+            }}
+            onCancel={() => setReplyingToId(null)}
+          />
+        ) : null}
+
+        {replies.length > 0 ? (
+          <div className="mt-3 space-y-3 pl-4 border-l-2 border-black/20">
+            {replies.map((reply) =>
+              renderCommentThread(reply, false),
+            )}
+          </div>
+        ) : null}
+      </article>
+    );
+  }
+
   async function createComment(content: string, parentId?: string | null) {
     const res = await fetch("/api/comments", {
       method: "POST",
@@ -196,127 +273,7 @@ export function PostCommentsSection({
       ) : null}
 
       <div className="space-y-4">
-        {topLevelComments.map((comment) => {
-          const replies = repliesByParentId.get(comment.id) ?? [];
-          const createdAt = new Date(comment.createdAt);
-          const dateLabel = createdAt.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          });
-
-          return (
-            <article
-              key={comment.id}
-              className="space-y-2 border-b border-black/40 pb-3 last:border-b-0"
-            >
-              <header className="space-y-0.5">
-                <p className="text-[10px] uppercase tracking-wide text-gray-500 text-center">
-                  {`By ${comment.authorDisplayName}`}
-                  {dateLabel ? ` — ${dateLabel}` : null}
-                </p>
-              </header>
-              <p className="post-article-body mt-1 whitespace-pre-wrap text-[11px] text-justify">
-                {comment.content}
-              </p>
-
-              <div className="mt-2 flex justify-center">
-                <LetterButton
-                  label="Respond to comment"
-                  size="small"
-                  onClick={() => {
-                    setArticleFormOpen(false);
-                    setReplyingToId((current) =>
-                      current === comment.id ? null : comment.id,
-                    );
-                  }}
-                  ariaLabel={`Respond to comment by ${comment.authorDisplayName}`}
-                />
-              </div>
-
-              {replyingToId === comment.id ? (
-                <CommentForm
-                  label={`Responding to ${comment.authorDisplayName}`}
-                  autoFocus
-                  onSubmit={async (content) => {
-                    await createComment(content, comment.id);
-                    setReplyingToId(null);
-                  }}
-                  onCancel={() => setReplyingToId(null)}
-                />
-              ) : null}
-
-              {replies.length > 0 ? (
-                <div className="mt-3 space-y-3">
-                  {replies.map((reply) => {
-                    const replyCreatedAt = new Date(reply.createdAt);
-                    const replyDateLabel = replyCreatedAt.toLocaleDateString(
-                      "en-US",
-                      {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      },
-                    );
-
-                    // Fallback snippet if for some reason replySnippet is missing.
-                    let snippet = reply.replySnippet;
-                    if (!snippet && comment.content) {
-                      const raw = comment.content.slice(0, 20);
-                      snippet =
-                        raw.length < comment.content.length
-                          ? `${raw}…`
-                          : raw;
-                    }
-
-                    return (
-                      <article key={reply.id} className="space-y-1">
-                        {snippet ? (
-                          <p className="text-[10px] uppercase tracking-wide text-gray-500">
-                            Responding to: “{snippet}”
-                          </p>
-                        ) : null}
-                        <p className="text-[10px] uppercase tracking-wide text-gray-500">
-                          {`By ${reply.authorDisplayName}`}
-                          {replyDateLabel ? ` — ${replyDateLabel}` : null}
-                        </p>
-                        <p className="post-article-body mt-1 whitespace-pre-wrap text-[11px] text-justify">
-                          {reply.content}
-                        </p>
-                        <div className="mt-2 flex justify-center">
-                          <LetterButton
-                            label="Respond to comment"
-                            size="small"
-                            onClick={() => {
-                              setArticleFormOpen(false);
-                              setReplyingToId((current) =>
-                                current === reply.id ? null : reply.id,
-                              );
-                            }}
-                            ariaLabel={`Respond to reply by ${reply.authorDisplayName}${
-                              snippet ? `, responding to ${snippet}` : ""
-                            }`}
-                          />
-                        </div>
-                        {replyingToId === reply.id ? (
-                          <CommentForm
-                            label={`Responding to ${reply.authorDisplayName}`}
-                            autoFocus
-                            onSubmit={async (content) => {
-                              await createComment(content, reply.id);
-                              setReplyingToId(null);
-                            }}
-                            onCancel={() => setReplyingToId(null)}
-                          />
-                        ) : null}
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </article>
-          );
-        })}
+        {topLevelComments.map((comment) => renderCommentThread(comment, true))}
 
         {topLevelComments.length === 0 && !articleFormOpen ? (
           <p className="text-[10px] text-center text-gray-500">
