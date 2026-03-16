@@ -56,13 +56,24 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <div className="min-h-screen newspaper-page">
+        <div className="min-h-screen newspaper-page flex flex-col">
           <HeaderShell
             session={session}
             displayName={displayName}
             dateLine={dateLine}
           />
-          <main className="mx-auto max-w-6xl">{children}</main>
+          <main className="mx-auto max-w-6xl flex-1 w-full">{children}</main>
+          <footer className="mx-auto max-w-6xl w-full px-4 pb-8 pt-6 text-xs text-muted-foreground flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-t border-black">
+            <div>© {new Date().getFullYear()} The Pigeon Post.</div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              <a href="/terms" className="underline-offset-2 hover:underline">
+                Terms of Service
+              </a>
+              <a href="/privacy" className="underline-offset-2 hover:underline">
+                Privacy Policy
+              </a>
+            </div>
+          </footer>
         </div>
         <ToastProvider />
         <Analytics />
