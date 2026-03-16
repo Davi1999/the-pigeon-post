@@ -1,8 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState, useLayoutEffect } from "react";
+import {
+  useEffect,
+  useRef,
+  useCallback,
+  useState,
+  useLayoutEffect,
+  useMemo,
+} from "react";
 import { PostArticle } from "./PostArticle";
-import { computeNewspaperLayout, type PageContent } from "./newspaperLayout";
+import {
+  computeNewspaperLayout,
+  type PageContent,
+  type PageItem,
+} from "./newspaperLayout";
 import { useIsDesktop } from "./useIsDesktop";
 import { EditionOptionsAccordion } from "./EditionOptionsAccordion";
 
@@ -157,6 +168,22 @@ export function DashboardFeed({
   const totalPages = pages.length;
   const currentPageContent = pages[currentPage];
 
+  const { itemIndexMap, lastIndexByPostId } = useMemo(() => {
+    const indexMap = new WeakMap<PageItem, number>();
+    const lastIndexMap = new Map<string, number>();
+
+    let globalIndex = 0;
+    for (const page of pages) {
+      for (const item of page.items) {
+        indexMap.set(item, globalIndex);
+        lastIndexMap.set(item.postId, globalIndex);
+        globalIndex += 1;
+      }
+    }
+
+    return { itemIndexMap: indexMap, lastIndexByPostId: lastIndexMap };
+  }, [pages]);
+
   if (isDesktop) {
     return (
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_1px_minmax(0,1fr)]">
@@ -181,6 +208,14 @@ export function DashboardFeed({
                   isOwnPost={item.isOwnPost}
                   continuedFromTitle={
                     item.isContinuation ? item.title : undefined
+                  }
+                  showContinueButton={
+                    (() => {
+                      const globalIndex = itemIndexMap.get(item);
+                      if (globalIndex === undefined) return false;
+                      const lastIndex = lastIndexByPostId.get(item.postId);
+                      return lastIndex === globalIndex;
+                    })()
                   }
                 />
               ))
