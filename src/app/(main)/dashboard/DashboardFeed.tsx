@@ -50,6 +50,7 @@ export function DashboardFeed({
   const [pageHeight, setPageHeight] = useState(0);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [accordionOpen, setAccordionOpen] = useState(false);
+  const [layoutFrozen, setLayoutFrozen] = useState(false);
 
   const feedContainerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -58,6 +59,32 @@ export function DashboardFeed({
   useEffect(() => {
     document.fonts.ready.then(() => setFontsLoaded(true));
   }, []);
+
+  const recomputeLayout = useCallback(() => {
+    if (layoutFrozen) return;
+    if (!isDesktop || !feedContainerRef.current || posts.length === 0) return;
+
+    const container = feedContainerRef.current;
+    const feedWidth = container.clientWidth;
+
+    const sidebarHeight = sidebarRef.current?.clientHeight ?? 0;
+    const rect = container.getBoundingClientRect();
+
+    const footer = document.querySelector("footer");
+    const footerTop = footer?.getBoundingClientRect().top;
+    const footerBased =
+      typeof footerTop === "number" ? Math.max(0, footerTop - rect.top) : 0;
+
+    const viewportBased = Math.max(400, window.innerHeight - rect.top - 24);
+    const height = Math.max(sidebarHeight, viewportBased, footerBased);
+
+    const computed = computeNewspaperLayout(posts, feedWidth, height, 24);
+    setPages(computed);
+    setPageHeight(height);
+    setCurrentPage((prev) =>
+      Math.min(prev, Math.max(0, computed.length - 1)),
+    );
+  }, [isDesktop, posts, fontsLoaded, layoutFrozen]);
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || loading) return;
@@ -84,23 +111,8 @@ export function DashboardFeed({
 
   // Desktop: compute newspaper layout using sidebar height as page height
   useLayoutEffect(() => {
-    if (!isDesktop || !feedContainerRef.current || posts.length === 0) return;
-
-    const container = feedContainerRef.current;
-    const feedWidth = container.clientWidth;
-
-    const sidebarHeight = sidebarRef.current?.clientHeight ?? 0;
-    const rect = container.getBoundingClientRect();
-    const viewportBased = Math.max(400, window.innerHeight - rect.top - 24);
-    const height = Math.max(sidebarHeight, viewportBased);
-
-    const computed = computeNewspaperLayout(posts, feedWidth, height, 24);
-    setPages(computed);
-    setPageHeight(height);
-    setCurrentPage((prev) =>
-      Math.min(prev, Math.max(0, computed.length - 1)),
-    );
-  }, [isDesktop, posts, fontsLoaded]);
+    recomputeLayout();
+  }, [recomputeLayout]);
 
   // Desktop: recompute on resize
   useEffect(() => {
@@ -110,24 +122,7 @@ export function DashboardFeed({
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        if (!feedContainerRef.current || posts.length === 0) return;
-        const container = feedContainerRef.current;
-        const feedWidth = container.clientWidth;
-
-        const sidebarHeight = sidebarRef.current?.clientHeight ?? 0;
-        const rect = container.getBoundingClientRect();
-        const viewportBased = Math.max(
-          400,
-          window.innerHeight - rect.top - 24,
-        );
-        const height = Math.max(sidebarHeight, viewportBased);
-
-        const computed = computeNewspaperLayout(posts, feedWidth, height, 24);
-        setPages(computed);
-        setPageHeight(height);
-        setCurrentPage((prev) =>
-          Math.min(prev, Math.max(0, computed.length - 1)),
-        );
+        recomputeLayout();
       }, 150);
     };
 
@@ -136,7 +131,22 @@ export function DashboardFeed({
       window.removeEventListener("resize", handleResize);
       clearTimeout(resizeTimer);
     };
-  }, [isDesktop, posts]);
+  }, [isDesktop, posts, recomputeLayout]);
+
+  // Desktop: recompute when the sidebar height changes (e.g., images or fonts load)
+  useEffect(() => {
+    if (!isDesktop) return;
+    if (!sidebarRef.current) return;
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      recomputeLayout();
+    });
+
+    observer.observe(sidebarRef.current);
+
+    return () => observer.disconnect();
+  }, [isDesktop, recomputeLayout]);
 
   // Mobile: infinite scroll
   useEffect(() => {
@@ -234,9 +244,10 @@ export function DashboardFeed({
                 {currentPage > 0 && (
                   <button
                     type="button"
-                    onClick={() =>
-                      setCurrentPage((p) => Math.max(0, p - 1))
-                    }
+                    onClick={() => {
+                      setLayoutFrozen(true);
+                      setCurrentPage((p) => Math.max(0, p - 1));
+                    }}
                     className="flex flex-col items-center gap-1 px-4 py-2 text-xs uppercase tracking-wider font-semibold text-black border-black/30 hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5ecd8]"
                     aria-label="Previous page"
                   >
@@ -252,11 +263,12 @@ export function DashboardFeed({
                 {currentPage < totalPages - 1 && (
                   <button
                     type="button"
-                    onClick={() =>
+                    onClick={() => {
+                      setLayoutFrozen(true);
                       setCurrentPage((p) =>
                         Math.min(totalPages - 1, p + 1),
-                      )
-                    }
+                      );
+                    }}
                     className="flex flex-col items-center gap-1 px-4 py-2 text-xs uppercase tracking-wider font-semibold text-black hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5ecd8]"
                     aria-label="Continue reading"
                   >
