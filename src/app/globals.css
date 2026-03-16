@@ -416,6 +416,14 @@ body {
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  .extra-extra-img {
+    /* Tint the black artwork to the newsprint tan in dark mode */
+    filter: brightness(0) saturate(100%) invert(92%) sepia(9%) saturate(531%) hue-rotate(322deg)
+      brightness(104%) contrast(96%);
+  }
+}
+
 .continued-from-tag {
   font-size: 10px;
   text-transform: uppercase;

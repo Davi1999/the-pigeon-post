@@ -93,7 +93,7 @@ export default async function DashboardPage() {
           <img
             src="/extra-extra.svg"
             alt="Read the latest updates"
-            className="h-auto w-full"
+            className="h-auto w-full extra-extra-img"
           />
           <p className="mt-2 text-center text-sm font-notable uppercase tracking-wide">
             HOT OFF THE PRESS!
