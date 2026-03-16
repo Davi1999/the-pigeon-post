@@ -80,7 +80,9 @@ class PageMeasurer {
 
   constructor(containerWidth: number, pageHeight: number, columnGap: number) {
     const columnWidth = (containerWidth - 2 * columnGap) / 3;
-    this.capacity = pageHeight * 3;
+    // Allow a small buffer so we do not prematurely treat content as overflowing
+    // when there is still room for a few lines of text at the bottom of the page.
+    this.capacity = pageHeight * 3 + 64;
     this.el = document.createElement("div");
     Object.assign(this.el.style, {
       position: "absolute",
