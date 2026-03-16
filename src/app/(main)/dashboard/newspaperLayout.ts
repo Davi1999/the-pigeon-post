@@ -80,9 +80,12 @@ class PageMeasurer {
 
   constructor(containerWidth: number, pageHeight: number, columnGap: number) {
     const columnWidth = (containerWidth - 2 * columnGap) / 3;
-    // Allow a small buffer so we do not prematurely treat content as overflowing
-    // when there is still room for a few lines of text at the bottom of the page.
-    this.capacity = pageHeight * 3 + 64;
+    // Be slightly conservative so we never place text that would end up
+    // below the visible page height in the real multi-column layout.
+    // Using a value just under 3 * pageHeight means we may leave a bit
+    // of whitespace at the bottom of the last column, but we avoid
+    // "lost" lines that are rendered but hidden by the page boundary.
+    this.capacity = pageHeight * 3 - 32;
     this.el = document.createElement("div");
     Object.assign(this.el.style, {
       position: "absolute",
