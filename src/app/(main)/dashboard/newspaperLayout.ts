@@ -119,6 +119,43 @@ class PageMeasurer {
   }
 }
 
+function splitWords(
+  measurer: PageMeasurer,
+  htmlBefore: string,
+  base: PageItem,
+  already: string,
+  paragraph: string,
+  rest: string,
+): { fitting: string; remainder: string } {
+  const words = paragraph.split(/\s+/);
+  if (words.length <= 1) {
+    return { fitting: paragraph, remainder: rest };
+  }
+
+  let lo = 1;
+  let hi = words.length;
+
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    const txt = words.slice(0, mid).join(" ");
+    const fullTxt = [already, txt].filter(Boolean).join("\n");
+    measurer.setContent(
+      htmlBefore + buildArticleHtml({ ...base, bodyText: fullTxt }),
+    );
+    if (!measurer.overflows) {
+      lo = mid;
+    } else {
+      hi = mid - 1;
+    }
+  }
+
+  const fitWords = words.slice(0, lo).join(" ");
+  const fit = [already, fitWords].filter(Boolean).join("\n");
+  const leftover = words.slice(lo).join(" ");
+  const remainder = [leftover, rest].filter(Boolean).join("\n");
+  return { fitting: fit, remainder };
+}
+
 function splitBody(
   measurer: PageMeasurer,
   htmlBefore: string,
@@ -136,11 +173,13 @@ function splitBody(
     isContinuation,
   };
 
+  // First, ensure at least the header and byline can fit.
   measurer.setContent(htmlBefore + buildArticleHtml(base));
   if (measurer.overflows) {
     return { fitting: "", remainder: body };
   }
 
+  // Try full body first.
   measurer.setContent(
     htmlBefore + buildArticleHtml({ ...base, bodyText: body }),
   );
@@ -152,6 +191,7 @@ function splitBody(
   let lo = 0;
   let hi = paras.length;
 
+  // Binary search how many whole paragraphs fit.
   while (lo < hi) {
     const mid = Math.ceil((lo + hi) / 2);
     const txt = paras.slice(0, mid).join("\n");
@@ -166,53 +206,40 @@ function splitBody(
   }
 
   if (lo === 0) {
+    // No whole paragraph fits — split inside the first paragraph.
     return splitWords(
       measurer,
       htmlBefore,
       base,
+      "",
       paras[0],
       paras.slice(1).join("\n"),
     );
   }
 
+  if (lo < paras.length) {
+    // Some whole paragraphs fit, but there is more body left.
+    // Try to also fit as much as possible of the next paragraph so we
+    // don't leave a large empty gap at the bottom of the page.
+    const already = paras.slice(0, lo).join("\n");
+    const nextPara = paras[lo];
+    const rest = paras.slice(lo + 1).join("\n");
+    const { fitting, remainder } = splitWords(
+      measurer,
+      htmlBefore,
+      base,
+      already,
+      nextPara,
+      rest,
+    );
+    return { fitting, remainder };
+  }
+
+  // All paragraphs fit except maybe trailing whitespace.
   return {
     fitting: paras.slice(0, lo).join("\n"),
     remainder: paras.slice(lo).join("\n"),
   };
-}
-
-function splitWords(
-  measurer: PageMeasurer,
-  htmlBefore: string,
-  base: PageItem,
-  paragraph: string,
-  rest: string,
-): { fitting: string; remainder: string } {
-  const words = paragraph.split(/\s+/);
-  if (words.length <= 1) {
-    return { fitting: paragraph, remainder: rest };
-  }
-
-  let lo = 1;
-  let hi = words.length;
-
-  while (lo < hi) {
-    const mid = Math.ceil((lo + hi) / 2);
-    const txt = words.slice(0, mid).join(" ");
-    measurer.setContent(
-      htmlBefore + buildArticleHtml({ ...base, bodyText: txt }),
-    );
-    if (!measurer.overflows) {
-      lo = mid;
-    } else {
-      hi = mid - 1;
-    }
-  }
-
-  const fit = words.slice(0, lo).join(" ");
-  const leftover = words.slice(lo).join(" ");
-  const remainder = [leftover, rest].filter(Boolean).join("\n");
-  return { fitting: fit, remainder };
 }
 
 export function computeNewspaperLayout(
