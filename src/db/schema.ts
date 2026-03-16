@@ -1,24 +1,24 @@
 import {
-    pgTable,
-    text,
-    timestamp,
-    uuid,
-    pgEnum,
-    index,
-    uniqueIndex,
-  } from "drizzle-orm/pg-core";
-  import { relations } from "drizzle-orm";
-  import { user } from "./auth-schema";
-  
-  // ---------------------------------------------------------------------------
-  // Enums
-  // ---------------------------------------------------------------------------
-  
-  export const friendRequestStatusEnum = pgEnum("friend_request_status", [
-    "pending",
-    "accepted",
-    "declined",
-  ]);
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  pgEnum,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { user } from "./auth-schema";
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+export const friendRequestStatusEnum = pgEnum("friend_request_status", [
+  "pending",
+  "accepted",
+  "declined",
+]);
   
   // ---------------------------------------------------------------------------
   // Posts
@@ -133,27 +133,59 @@ import {
   // Feature Request Likes
   // ---------------------------------------------------------------------------
   
-  export const featureRequestLikes = pgTable(
-    "feature_request_likes",
-    {
-      id: uuid("id").primaryKey().defaultRandom(),
-      requestId: uuid("request_id")
-        .notNull()
-        .references(() => featureRequests.id, { onDelete: "cascade" }),
-      userId: text("user_id")
-        .notNull()
-        .references(() => user.id, { onDelete: "cascade" }),
-      createdAt: timestamp("created_at").defaultNow().notNull(),
-    },
-    (t) => [
-      uniqueIndex("feature_request_likes_request_user_idx").on(
-        t.requestId,
-        t.userId,
-      ),
-      index("feature_request_likes_request_idx").on(t.requestId),
-      index("feature_request_likes_user_idx").on(t.userId),
-    ],
-  );
+export const featureRequestLikes = pgTable(
+  "feature_request_likes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => featureRequests.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("feature_request_likes_request_user_idx").on(
+      t.requestId,
+      t.userId,
+    ),
+    index("feature_request_likes_request_idx").on(t.requestId),
+    index("feature_request_likes_user_idx").on(t.userId),
+  ],
+);
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+export const notifications = pgTable("notifications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  body: text("body").notNull(),
+  link: text("link"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const notificationViews = pgTable(
+  "notification_views",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    notificationId: uuid("notification_id")
+      .notNull()
+      .references(() => notifications.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("notification_views_notification_user_idx").on(
+      t.notificationId,
+      t.userId,
+    ),
+    index("notification_views_user_idx").on(t.userId),
+  ],
+);
   
   // ---------------------------------------------------------------------------
   // Relations
@@ -162,14 +194,15 @@ import {
   // Extends the userRelations defined in auth-schema.ts.
   // Drizzle merges all relations() calls for the same table at runtime,
   // so auth-schema.ts doesn't need to be modified.
-  export const userSocialRelations = relations(user, ({ many }) => ({
-    posts: many(posts),
-    comments: many(comments),
-    sentFriendRequests: many(friendRequests, { relationName: "sender" }),
-    receivedFriendRequests: many(friendRequests, { relationName: "receiver" }),
-    featureRequests: many(featureRequests),
-    featureRequestLikes: many(featureRequestLikes),
-  }));
+export const userSocialRelations = relations(user, ({ many }) => ({
+  posts: many(posts),
+  comments: many(comments),
+  sentFriendRequests: many(friendRequests, { relationName: "sender" }),
+  receivedFriendRequests: many(friendRequests, { relationName: "receiver" }),
+  featureRequests: many(featureRequests),
+  featureRequestLikes: many(featureRequestLikes),
+  notificationViews: many(notificationViews),
+}));
   
   export const postRelations = relations(posts, ({ one, many }) => ({
     author: one(user, { fields: [posts.authorId], references: [user.id] }),
@@ -211,16 +244,37 @@ import {
     }),
   );
   
-  export const featureRequestLikeRelations = relations(
-    featureRequestLikes,
-    ({ one }) => ({
-      request: one(featureRequests, {
-        fields: [featureRequestLikes.requestId],
-        references: [featureRequests.id],
-      }),
-      user: one(user, {
-        fields: [featureRequestLikes.userId],
-        references: [user.id],
-      }),
+export const featureRequestLikeRelations = relations(
+  featureRequestLikes,
+  ({ one }) => ({
+    request: one(featureRequests, {
+      fields: [featureRequestLikes.requestId],
+      references: [featureRequests.id],
     }),
-  );
+    user: one(user, {
+      fields: [featureRequestLikes.userId],
+      references: [user.id],
+    }),
+  }),
+);
+
+export const notificationRelations = relations(
+  notifications,
+  ({ many }) => ({
+    views: many(notificationViews),
+  }),
+);
+
+export const notificationViewRelations = relations(
+  notificationViews,
+  ({ one }) => ({
+    notification: one(notifications, {
+      fields: [notificationViews.notificationId],
+      references: [notifications.id],
+    }),
+    user: one(user, {
+      fields: [notificationViews.userId],
+      references: [user.id],
+    }),
+  }),
+);

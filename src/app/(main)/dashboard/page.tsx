@@ -6,6 +6,7 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { buttonVariants } from "@/components/ui/Button";
 import { getFeedPostsPage } from "@/lib/feed";
 import { DashboardFeed } from "./DashboardFeed";
+import { DashboardNotifications } from "./DashboardNotifications";
 import { DashboardEmptyState } from "./DashboardEmptyState";
 
 const INITIAL_PAGE_SIZE = 12;
@@ -105,6 +106,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
+      <DashboardNotifications />
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Masthead */}
         <header className="border-b border-black dark:border-[#f5ecd8] pb-4 text-center">

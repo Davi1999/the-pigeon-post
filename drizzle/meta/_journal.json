@@ -15,6 +15,13 @@
       "when": 1773324491353,
       "tag": "0001_groovy_maverick",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773669443536,
+      "tag": "0002_lucky_lily_hollister",
+      "breakpoints": true
     }
   ]
 }

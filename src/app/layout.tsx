@@ -6,6 +6,7 @@ import "./globals.css";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { HeaderShell } from "./HeaderShell";
+import { ToastProvider } from "./ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,6 +49,12 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=close"
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="min-h-screen newspaper-page">
           <HeaderShell
@@ -57,6 +64,7 @@ export default async function RootLayout({
           />
           <main className="mx-auto max-w-6xl">{children}</main>
         </div>
+        <ToastProvider />
         <Analytics />
         <SpeedInsights />
       </body>
