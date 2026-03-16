@@ -92,7 +92,7 @@ export function DashboardFeed({
     const sidebarHeight = sidebarRef.current?.clientHeight ?? 0;
     const rect = container.getBoundingClientRect();
     const viewportBased = Math.max(400, window.innerHeight - rect.top - 24);
-    const height = sidebarHeight > 100 ? sidebarHeight : viewportBased;
+    const height = Math.max(sidebarHeight, viewportBased);
 
     const computed = computeNewspaperLayout(posts, feedWidth, height, 24);
     setPages(computed);
@@ -120,7 +120,7 @@ export function DashboardFeed({
           400,
           window.innerHeight - rect.top - 24,
         );
-        const height = sidebarHeight > 100 ? sidebarHeight : viewportBased;
+        const height = Math.max(sidebarHeight, viewportBased);
 
         const computed = computeNewspaperLayout(posts, feedWidth, height, 24);
         setPages(computed);
