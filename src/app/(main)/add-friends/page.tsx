@@ -359,6 +359,80 @@ export default async function AddFriendsPage({
       .where(inArray(userTable.id, friendUserIds));
   }
 
+  // People you may know: users with 2+ mutual friends (not already friends, no pending request)
+  let peopleYouMayKnow: { id: string; name: string | null; email: string }[] =
+    [];
+
+  if (friendUserIds.length >= 2) {
+    const friendshipsOfFriends = await db
+      .select({
+        senderId: friendRequests.senderId,
+        receiverId: friendRequests.receiverId,
+      })
+      .from(friendRequests)
+      .where(
+        and(
+          eq(friendRequests.status, "accepted"),
+          or(
+            inArray(friendRequests.senderId, friendUserIds),
+            inArray(friendRequests.receiverId, friendUserIds),
+          ),
+        ),
+      );
+
+    const candidateCounts = new Map<string, number>();
+    const friendIdSet = new Set(friendUserIds);
+
+    for (const row of friendshipsOfFriends) {
+      const candidate =
+        friendIdSet.has(row.senderId) ? row.receiverId : row.senderId;
+      if (candidate === currentUserId || friendIdSet.has(candidate)) continue;
+      candidateCounts.set(
+        candidate,
+        (candidateCounts.get(candidate) ?? 0) + 1,
+      );
+    }
+
+    const recommendedIds = [...candidateCounts.entries()]
+      .filter(([, count]) => count >= 2)
+      .map(([id]) => id);
+
+    if (recommendedIds.length > 0) {
+      const pendingWithMe = await db
+        .select({
+          senderId: friendRequests.senderId,
+          receiverId: friendRequests.receiverId,
+        })
+        .from(friendRequests)
+        .where(
+          and(
+            eq(friendRequests.status, "pending"),
+            or(
+              eq(friendRequests.senderId, currentUserId),
+              eq(friendRequests.receiverId, currentUserId),
+            ),
+          ),
+        );
+      const pendingPartnerIds = new Set(
+        pendingWithMe.map((r) =>
+          r.senderId === currentUserId ? r.receiverId : r.senderId,
+        ),
+      );
+      const allowedIds = recommendedIds.filter((id) => !pendingPartnerIds.has(id));
+
+      if (allowedIds.length > 0) {
+        peopleYouMayKnow = await db
+          .select({
+            id: userTable.id,
+            name: userTable.name,
+            email: userTable.email,
+          })
+          .from(userTable)
+          .where(inArray(userTable.id, allowedIds));
+      }
+    }
+  }
+
   return (
     <div className="px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -457,6 +531,52 @@ export default async function AddFriendsPage({
                         <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
                           Pending
                         </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            <div className="space-y-2 border-t pt-4">
+              <h3 className="text-sm font-medium text-gray-700">
+                People you may know
+              </h3>
+              <p className="text-xs text-gray-500">
+                Users you have 2+ mutual friends with.
+              </p>
+              {peopleYouMayKnow.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  No recommendations right now. Add more friends to see people you
+                  may know.
+                </p>
+              ) : (
+                <ul className="space-y-2 text-sm">
+                  {peopleYouMayKnow.map((rec) => {
+                    const { firstName, lastName } = splitName(rec.name);
+                    const displayName =
+                      firstName || lastName
+                        ? [firstName, lastName].filter(Boolean).join(" ")
+                        : rec.email;
+                    return (
+                      <li
+                        key={rec.id}
+                        className="flex items-center justify-between gap-2 rounded border border-dashed px-3 py-2"
+                      >
+                        <span className="font-medium truncate">{displayName}</span>
+                        <form action={sendFriendRequest}>
+                          <input
+                            type="hidden"
+                            name="email"
+                            value={rec.email}
+                          />
+                          <button
+                            type="submit"
+                            className="shrink-0 rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900"
+                          >
+                            Send friend request
+                          </button>
+                        </form>
                       </li>
                     );
                   })}
