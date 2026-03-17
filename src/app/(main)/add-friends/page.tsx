@@ -561,10 +561,10 @@ export default async function AddFriendsPage({
                     return (
                       <li
                         key={rec.id}
-                        className="flex items-center justify-between gap-2 rounded border border-dashed px-3 py-2"
+                        className="space-y-2 rounded border border-dashed px-3 py-2"
                       >
-                        <span className="font-medium truncate">{displayName}</span>
-                        <form action={sendFriendRequest}>
+                        <div className="font-medium wrap-break-word">{displayName}</div>
+                        <form action={sendFriendRequest} className="w-full">
                           <input
                             type="hidden"
                             name="email"
@@ -572,7 +572,7 @@ export default async function AddFriendsPage({
                           />
                           <button
                             type="submit"
-                            className="shrink-0 rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900"
+                            className="w-full rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900"
                           >
                             Send friend request
                           </button>
