@@ -39,6 +39,13 @@ function layoutKeyDim(n: number): number {
   return Math.max(0, Math.round(n / LAYOUT_KEY_BUCKET_PX) * LAYOUT_KEY_BUCKET_PX);
 }
 
+/**
+ * Page nav + `space-y-4` gap: must not be measured live on the aside, or switching
+ * between one vs two nav buttons changes sidebar height, retriggers layout, and
+ * repaginates — so page 1’s text breaks move after visiting page 2.
+ */
+const SIDEBAR_NAV_LAYOUT_RESERVE_PX = 168;
+
 type DashboardFeedProps = {
   initialPosts: FeedPostSerialized[];
   initialNextCursor: string | null;
@@ -63,13 +70,13 @@ export function DashboardFeed({
   const [accordionOpen, setAccordionOpen] = useState(false);
 
   const feedContainerRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLElement>(null);
+  /** Edition column body only (excludes page nav) so nav layout does not affect pagination. */
+  const sidebarContentMeasureRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   /**
    * Dedupes `computeNewspaperLayout`: same 8px-bucketed size + posts fingerprint + font load
    * state skips redundant work (ResizeObserver noise). Window resize clears the ref so drags
-   * always get a fresh pass. Page buttons only change `currentPage`; they do not need a
-   * separate “frozen layout” flag because observers already no-op when the key is unchanged.
+   * can rerun even when bucketed dimensions match. Page buttons only change `currentPage`.
    */
   const lastLayoutInputKeyRef = useRef<string | null>(null);
 
@@ -83,7 +90,8 @@ export function DashboardFeed({
     const container = feedContainerRef.current;
     const feedWidth = container.clientWidth;
 
-    const sidebarHeight = sidebarRef.current?.clientHeight ?? 0;
+    const sidebarBodyHeight =
+      sidebarContentMeasureRef.current?.clientHeight ?? 0;
     const rect = container.getBoundingClientRect();
 
     const footer = document.querySelector("footer");
@@ -92,7 +100,11 @@ export function DashboardFeed({
       typeof footerTop === "number" ? Math.max(0, footerTop - rect.top) : 0;
 
     const viewportBased = Math.max(400, window.innerHeight - rect.top - 24);
-    const height = Math.max(sidebarHeight, viewportBased, footerBased);
+    const height = Math.max(
+      sidebarBodyHeight + SIDEBAR_NAV_LAYOUT_RESERVE_PX,
+      viewportBased,
+      footerBased,
+    );
 
     const postsFingerprint = posts
       .map((p) => `${p.id}:${p.body.length}`)
@@ -160,6 +172,7 @@ export function DashboardFeed({
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
+        lastLayoutInputKeyRef.current = null;
         recomputeLayout();
       }, 150);
     };
@@ -171,17 +184,17 @@ export function DashboardFeed({
     };
   }, [isDesktop, posts, recomputeLayout]);
 
-  // Desktop: recompute when the sidebar height changes (e.g., images or fonts load)
-  useEffect(() => {
+  // Desktop: recompute when sidebar *content* resizes (not page nav).
+  useLayoutEffect(() => {
     if (!isDesktop) return;
-    if (!sidebarRef.current) return;
-    if (typeof ResizeObserver === "undefined") return;
+    const el = sidebarContentMeasureRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
 
     const observer = new ResizeObserver(() => {
       recomputeLayout();
     });
 
-    observer.observe(sidebarRef.current);
+    observer.observe(el);
 
     return () => observer.disconnect();
   }, [isDesktop, recomputeLayout]);
@@ -272,7 +285,7 @@ export function DashboardFeed({
 
         <div className="hidden bg-black dark:bg-[#f5ecd8] lg:block" aria-hidden />
 
-        <aside ref={sidebarRef} className="space-y-4 text-sm">
+        <aside className="space-y-4 text-sm">
           <nav
             className="flex flex-col items-center gap-6 pb-3"
             aria-label="Page navigation"
@@ -321,7 +334,7 @@ export function DashboardFeed({
             )}
           </nav>
 
-          {sidebarContent}
+          <div ref={sidebarContentMeasureRef}>{sidebarContent}</div>
         </aside>
       </div>
     );
