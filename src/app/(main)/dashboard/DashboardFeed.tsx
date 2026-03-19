@@ -11,6 +11,7 @@ import {
 import { PostArticle } from "./PostArticle";
 import {
   computeNewspaperLayout,
+  NEWSPAPER_COLUMN_GAP_PX,
   type PageContent,
   type PageItem,
 } from "./newspaperLayout";
@@ -27,6 +28,16 @@ export type FeedPostSerialized = {
 };
 
 const PAGE_SIZE = 12;
+
+/**
+ * Buckets dimensions for deduping layout work only (not for measurement).
+ * 8px absorbs sub-pixel / 1px observer noise while keeping distinct sizes separate.
+ */
+const LAYOUT_KEY_BUCKET_PX = 8;
+
+function layoutKeyDim(n: number): number {
+  return Math.max(0, Math.round(n / LAYOUT_KEY_BUCKET_PX) * LAYOUT_KEY_BUCKET_PX);
+}
 
 type DashboardFeedProps = {
   initialPosts: FeedPostSerialized[];
@@ -50,18 +61,23 @@ export function DashboardFeed({
   const [pageHeight, setPageHeight] = useState(0);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [accordionOpen, setAccordionOpen] = useState(false);
-  const [layoutFrozen, setLayoutFrozen] = useState(false);
 
   const feedContainerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  /**
+   * Dedupes `computeNewspaperLayout`: same 8px-bucketed size + posts fingerprint + font load
+   * state skips redundant work (ResizeObserver noise). Window resize clears the ref so drags
+   * always get a fresh pass. Page buttons only change `currentPage`; they do not need a
+   * separate “frozen layout” flag because observers already no-op when the key is unchanged.
+   */
+  const lastLayoutInputKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     document.fonts.ready.then(() => setFontsLoaded(true));
   }, []);
 
   const recomputeLayout = useCallback(() => {
-    if (layoutFrozen) return;
     if (!isDesktop || !feedContainerRef.current || posts.length === 0) return;
 
     const container = feedContainerRef.current;
@@ -78,13 +94,35 @@ export function DashboardFeed({
     const viewportBased = Math.max(400, window.innerHeight - rect.top - 24);
     const height = Math.max(sidebarHeight, viewportBased, footerBased);
 
-    const computed = computeNewspaperLayout(posts, feedWidth, height, 24);
+    const postsFingerprint = posts
+      .map((p) => `${p.id}:${p.body.length}`)
+      .join("|");
+    const inputKey = [
+      layoutKeyDim(feedWidth),
+      layoutKeyDim(height),
+      postsFingerprint,
+      fontsLoaded,
+    ].join(":");
+
+    if (inputKey === lastLayoutInputKeyRef.current) {
+      return;
+    }
+    lastLayoutInputKeyRef.current = inputKey;
+
+    // Layout stability: pagination uses clientWidth × derived height for measurement
+    // (bucket only gates recomputation). Page height style matches measurement.
+    const computed = computeNewspaperLayout(
+      posts,
+      feedWidth,
+      height,
+      NEWSPAPER_COLUMN_GAP_PX,
+    );
     setPages(computed);
     setPageHeight(height);
     setCurrentPage((prev) =>
       Math.min(prev, Math.max(0, computed.length - 1)),
     );
-  }, [isDesktop, posts, fontsLoaded, layoutFrozen]);
+  }, [isDesktop, posts, fontsLoaded]);
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || loading) return;
@@ -245,7 +283,6 @@ export function DashboardFeed({
                   <button
                     type="button"
                     onClick={() => {
-                      setLayoutFrozen(true);
                       setCurrentPage((p) => Math.max(0, p - 1));
                     }}
                     className="flex flex-col items-center gap-1 px-4 py-2 text-xs uppercase tracking-wider font-semibold text-black border-black/30 hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5ecd8]"
@@ -264,7 +301,6 @@ export function DashboardFeed({
                   <button
                     type="button"
                     onClick={() => {
-                      setLayoutFrozen(true);
                       setCurrentPage((p) =>
                         Math.min(totalPages - 1, p + 1),
                       );

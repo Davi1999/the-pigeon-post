@@ -469,6 +469,7 @@ body {
 
 /* Newspaper paged layout (desktop) */
 
+/* column-gap must match NEWSPAPER_COLUMN_GAP_PX in dashboard/newspaperLayout.ts (1.5rem ≈ 24px at 16px root). */
 .newspaper-paged-columns {
   column-count: 3;
   column-gap: 1.5rem;

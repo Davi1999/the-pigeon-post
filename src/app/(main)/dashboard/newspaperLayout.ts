@@ -1,4 +1,17 @@
+/**
+ * Desktop newspaper pagination: binary search + off-screen DOM measurement to
+ * split post bodies across “pages” of fixed column geometry without clipping.
+ *
+ * The HTML and metrics here MUST stay aligned with:
+ * - `PostArticle.tsx` (structure, font sizes, spacing)
+ * - `.newspaper-paged-columns` and `.post-article-body` in `globals.css`
+ * - `NEWSPAPER_COLUMN_GAP_PX` ↔ `column-gap` on `.newspaper-paged-columns`
+ */
+
 import type { FeedPostSerialized } from "./DashboardFeed";
+
+/** Must match `column-gap` on `.newspaper-paged-columns` (1.5rem ≈ 24px at 16px root). */
+export const NEWSPAPER_COLUMN_GAP_PX = 24;
 
 export type PageItem = {
   postId: string;
@@ -13,6 +26,17 @@ export type PageItem = {
 export type PageContent = {
   items: PageItem[];
 };
+
+type LayoutChrome = {
+  isDark: boolean;
+  /** “Continue conversation” block — only the last layout chunk of a post (see DashboardFeed). */
+  showContinueBlock: boolean;
+};
+
+function layoutPrefersDark(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
 
 function escapeHtml(text: string): string {
   return text
@@ -35,7 +59,22 @@ function formatDateStr(iso: string): string {
   }
 }
 
-function buildArticleHtml(item: PageItem): string {
+/** Inline stand-in for `LetterButton` (default): image area + label + padding. */
+function continueConversationBlockHtml(): string {
+  return [
+    '<div style="margin-top:12px;display:flex;justify-content:center;">',
+    '<div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:8px 16px;',
+    "text-transform:uppercase;letter-spacing:0.05em;font-size:12px;line-height:1.2;font-weight:600;",
+    "border:1px solid rgba(0,0,0,0.4);background:#f5ecd8;color:#000;min-height:72px;justify-content:center;",
+    'box-sizing:border-box;">',
+    '<div style="width:36px;height:36px;background:rgba(0,0,0,0.08);" aria-hidden></div>',
+    "<span>Continue conversation</span>",
+    "</div>",
+    "</div>",
+  ].join("");
+}
+
+function buildArticleHtml(item: PageItem, chrome: LayoutChrome): string {
   const title = escapeHtml(item.title || "Untitled story");
   const body = escapeHtml(item.bodyText);
   const who = item.isOwnPost
@@ -44,32 +83,40 @@ function buildArticleHtml(item: PageItem): string {
   const date = formatDateStr(item.createdAt);
   const byline = date ? `${who} &mdash; ${date}` : who;
 
+  const borderColor = chrome.isDark ? "#f5ecd8" : "#000000";
+  const bodyColor = chrome.isDark ? "#f5ecd8" : "#222222";
+  const mutedColor = "rgb(107,114,128)";
+
   const bodyHtml = body
-    ? `<p style="margin:4px 0 0;white-space:pre-wrap;font-size:11px;color:rgb(31,41,55);text-align:justify;line-height:1.625;">${body}</p>`
+    ? `<p style="margin:4px 0 0;white-space:pre-wrap;font-size:11px;color:${bodyColor};text-align:justify;line-height:1.625;">${body}</p>`
     : "";
+
+  const tailHtml = chrome.showContinueBlock ? continueConversationBlockHtml() : "";
 
   if (item.isContinuation) {
     return [
-      '<div style="border-bottom:1px solid black;padding-bottom:12px;margin-bottom:16px;font-size:12px;line-height:1.625;">',
-      '<div style="break-inside:avoid;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;font-style:italic;text-align:center;padding:4px 0 6px;color:rgb(107,114,128);">',
+      `<div style="border-bottom:1px solid ${borderColor};padding-bottom:12px;margin-bottom:16px;font-size:12px;line-height:1.625;">`,
+      `<div style="break-inside:avoid;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;font-style:italic;text-align:center;padding:4px 0 6px;color:${mutedColor};">`,
       `Continued from \u201c${title}\u201d`,
       "</div>",
       bodyHtml,
+      tailHtml,
       "</div>",
     ].join("");
   }
 
   return [
-    '<div style="border-bottom:1px solid black;padding-bottom:12px;margin-bottom:16px;font-size:12px;line-height:1.625;">',
+    `<div style="border-bottom:1px solid ${borderColor};padding-bottom:12px;margin-bottom:16px;font-size:12px;line-height:1.625;">`,
     '<div style="break-inside:avoid;">',
     `<h2 style="font-family:&#39;Notable&#39;,&#39;Special Elite&#39;,system-ui,serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;text-align:center;margin:0;line-height:1.4;">${title}</h2>`,
     '<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;">',
-    '<div style="height:1px;width:32px;background:black;"></div>',
-    `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.025em;color:rgb(107,114,128);text-align:center;padding:8px;margin:0;">${byline}</p>`,
-    '<div style="height:1px;width:32px;background:black;"></div>',
+    `<div style="height:1px;width:32px;background:${borderColor};"></div>`,
+    `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.025em;color:${mutedColor};text-align:center;padding:8px;margin:0;">${byline}</p>`,
+    `<div style="height:1px;width:32px;background:${borderColor};"></div>`,
     "</div>",
     "</div>",
     bodyHtml,
+    tailHtml,
     "</div>",
   ].join("");
 }
@@ -93,6 +140,8 @@ class PageMeasurer {
       left: "-9999px",
       width: `${columnWidth}px`,
       fontFamily: '"Special Elite", system-ui, sans-serif',
+      fontSize: "12px",
+      lineHeight: "1.625",
     });
     document.body.appendChild(this.el);
   }
@@ -129,6 +178,7 @@ function splitWords(
   already: string,
   paragraph: string,
   rest: string,
+  isDark: boolean,
 ): { fitting: string; remainder: string } {
   const words = paragraph.split(/\s+/);
   if (words.length <= 1) {
@@ -142,8 +192,14 @@ function splitWords(
     const mid = Math.ceil((lo + hi) / 2);
     const txt = words.slice(0, mid).join(" ");
     const fullTxt = [already, txt].filter(Boolean).join("\n");
+    const leftoverWords = words.slice(mid).join(" ");
+    const terminal = leftoverWords === "" && rest === "";
     measurer.setContent(
-      htmlBefore + buildArticleHtml({ ...base, bodyText: fullTxt }),
+      htmlBefore +
+        buildArticleHtml(
+          { ...base, bodyText: fullTxt },
+          { isDark, showContinueBlock: terminal },
+        ),
     );
     if (!measurer.overflows) {
       lo = mid;
@@ -165,6 +221,7 @@ function splitBody(
   post: FeedPostSerialized,
   body: string,
   isContinuation: boolean,
+  isDark: boolean,
 ): { fitting: string; remainder: string } {
   const base: PageItem = {
     postId: post.id,
@@ -177,14 +234,21 @@ function splitBody(
   };
 
   // First, ensure at least the header and byline can fit.
-  measurer.setContent(htmlBefore + buildArticleHtml(base));
+  measurer.setContent(
+    htmlBefore +
+      buildArticleHtml(base, { isDark, showContinueBlock: false }),
+  );
   if (measurer.overflows) {
     return { fitting: "", remainder: body };
   }
 
-  // Try full body first.
+  // Try full body first (terminal segment — include continue block in measure).
   measurer.setContent(
-    htmlBefore + buildArticleHtml({ ...base, bodyText: body }),
+    htmlBefore +
+      buildArticleHtml(
+        { ...base, bodyText: body },
+        { isDark, showContinueBlock: true },
+      ),
   );
   if (!measurer.overflows) {
     return { fitting: body, remainder: "" };
@@ -194,12 +258,17 @@ function splitBody(
   let lo = 0;
   let hi = paras.length;
 
-  // Binary search how many whole paragraphs fit.
+  // Binary search how many whole paragraphs fit (non-terminal while more paras may follow).
   while (lo < hi) {
     const mid = Math.ceil((lo + hi) / 2);
     const txt = paras.slice(0, mid).join("\n");
+    const terminalPara = mid === paras.length;
     measurer.setContent(
-      htmlBefore + buildArticleHtml({ ...base, bodyText: txt }),
+      htmlBefore +
+        buildArticleHtml(
+          { ...base, bodyText: txt },
+          { isDark, showContinueBlock: terminalPara },
+        ),
     );
     if (!measurer.overflows) {
       lo = mid;
@@ -215,8 +284,9 @@ function splitBody(
       htmlBefore,
       base,
       "",
-      paras[0],
+      paras[0] ?? "",
       paras.slice(1).join("\n"),
+      isDark,
     );
   }
 
@@ -225,7 +295,7 @@ function splitBody(
     // Try to also fit as much as possible of the next paragraph so we
     // don't leave a large empty gap at the bottom of the page.
     const already = paras.slice(0, lo).join("\n");
-    const nextPara = paras[lo];
+    const nextPara = paras[lo] ?? "";
     const rest = paras.slice(lo + 1).join("\n");
     const { fitting, remainder } = splitWords(
       measurer,
@@ -234,6 +304,7 @@ function splitBody(
       already,
       nextPara,
       rest,
+      isDark,
     );
     return { fitting, remainder };
   }
@@ -249,12 +320,13 @@ export function computeNewspaperLayout(
   posts: FeedPostSerialized[],
   containerWidth: number,
   pageHeight: number,
-  columnGap: number = 24,
+  columnGap: number = NEWSPAPER_COLUMN_GAP_PX,
 ): PageContent[] {
   if (containerWidth <= 0 || pageHeight <= 0 || posts.length === 0) {
     return [{ items: [] }];
   }
 
+  const isDark = layoutPrefersDark();
   const measurer = new PageMeasurer(containerWidth, pageHeight, columnGap);
   const pages: PageContent[] = [];
 
@@ -282,7 +354,10 @@ export function computeNewspaperLayout(
           isContinuation: true,
         };
 
-        const artHtml = buildArticleHtml(item);
+        const artHtml = buildArticleHtml(item, {
+          isDark,
+          showContinueBlock: true,
+        });
         measurer.setContent(artHtml);
 
         if (measurer.overflows) {
@@ -293,6 +368,7 @@ export function computeNewspaperLayout(
             post,
             contBody,
             true,
+            isDark,
           );
           if (fitting) {
             items.push({ ...item, bodyText: fitting });
@@ -330,7 +406,10 @@ export function computeNewspaperLayout(
         };
 
         const prevHtml = html;
-        const artHtml = buildArticleHtml(item);
+        const artHtml = buildArticleHtml(item, {
+          isDark,
+          showContinueBlock: true,
+        });
         measurer.appendHtml(artHtml);
         html = measurer.getContent();
 
@@ -342,6 +421,7 @@ export function computeNewspaperLayout(
             post,
             post.body,
             false,
+            isDark,
           );
 
           if (fitting) {
