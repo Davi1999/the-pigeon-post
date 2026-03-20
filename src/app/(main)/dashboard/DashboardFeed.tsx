@@ -17,6 +17,8 @@ import {
 } from "./newspaperLayout";
 import { useIsDesktop } from "./useIsDesktop";
 import { EditionOptionsAccordion } from "./EditionOptionsAccordion";
+import { NEWSPAPER_SKELETON_FRAME } from "./dashboardFeedLayout";
+import { NewspaperFeedSkeletonContent } from "./DashboardFeedSkeleton";
 
 export type FeedPostSerialized = {
   id: string;
@@ -229,6 +231,13 @@ export function DashboardFeed({
   const totalPages = pages.length;
   const currentPageContent = pages[currentPage];
 
+  const desktopLayoutPending =
+    posts.length > 0 &&
+    (!fontsLoaded ||
+      pages.length === 0 ||
+      !currentPageContent ||
+      currentPageContent.items.length === 0);
+
   const { itemIndexMap, lastIndexByPostId } = useMemo(() => {
     const indexMap = new WeakMap<PageItem, number>();
     const lastIndexMap = new Map<string, number>();
@@ -251,36 +260,44 @@ export function DashboardFeed({
         <div
           ref={feedContainerRef}
           className="lg:col-span-3 newspaper-paged-columns"
+          aria-busy={desktopLayoutPending}
+          aria-label={
+            desktopLayoutPending ? "Loading front page layout" : undefined
+          }
           style={
-            pageHeight > 0
-              ? { height: pageHeight, overflow: "hidden" }
-              : undefined
+            desktopLayoutPending
+              ? NEWSPAPER_SKELETON_FRAME
+              : pageHeight > 0
+                ? { height: pageHeight, overflow: "hidden" }
+                : undefined
           }
         >
-          {pages.length > 0 && currentPageContent
-            ? currentPageContent.items.map((item, idx) => (
-                <PostArticle
-                  key={`${item.postId}-${idx}`}
-                  postId={item.postId}
-                  title={item.title}
-                  body={item.bodyText}
-                  authorDisplayName={item.authorDisplayName}
-                  createdAt={new Date(item.createdAt)}
-                  isOwnPost={item.isOwnPost}
-                  continuedFromTitle={
-                    item.isContinuation ? item.title : undefined
-                  }
-                  showContinueButton={
-                    (() => {
-                      const globalIndex = itemIndexMap.get(item);
-                      if (globalIndex === undefined) return false;
-                      const lastIndex = lastIndexByPostId.get(item.postId);
-                      return lastIndex === globalIndex;
-                    })()
-                  }
-                />
-              ))
-            : null}
+          {desktopLayoutPending ? (
+            <NewspaperFeedSkeletonContent />
+          ) : (
+            currentPageContent.items.map((item, idx) => (
+              <PostArticle
+                key={`${item.postId}-${idx}`}
+                postId={item.postId}
+                title={item.title}
+                body={item.bodyText}
+                authorDisplayName={item.authorDisplayName}
+                createdAt={new Date(item.createdAt)}
+                isOwnPost={item.isOwnPost}
+                continuedFromTitle={
+                  item.isContinuation ? item.title : undefined
+                }
+                showContinueButton={
+                  (() => {
+                    const globalIndex = itemIndexMap.get(item);
+                    if (globalIndex === undefined) return false;
+                    const lastIndex = lastIndexByPostId.get(item.postId);
+                    return lastIndex === globalIndex;
+                  })()
+                }
+              />
+            ))
+          )}
         </div>
 
         <div className="hidden bg-black dark:bg-[#f5ecd8] lg:block" aria-hidden />
