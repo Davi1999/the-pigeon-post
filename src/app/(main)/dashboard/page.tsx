@@ -110,7 +110,7 @@ export default async function DashboardPage() {
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Masthead */}
         <header className="border-b border-black dark:border-[#f5ecd8] pb-4 text-center">
-          <h1 className="text-3xl font-semibold tracking-[0.25em] uppercase font-diplomata text-center">
+          <h1 className="text-[1.4rem] font-semibold tracking-[0.08em] uppercase font-diplomata text-center sm:text-3xl sm:tracking-[0.25em]">
             Personal Dispatches from You and Your Friends!
           </h1>
         </header>

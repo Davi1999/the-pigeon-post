@@ -29,6 +29,7 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
   /** Reuses an already-uploaded file when retrying a failed post creation. */
   const uploadedImageRef = useRef<{ file: File; path: string } | null>(null);
   const previewUrlRef = useRef<string | null>(null);
@@ -44,6 +45,14 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
       }
     };
   }, []);
+
+  // The submit button sits below a tall textarea, so surface errors where the
+  // user is looking instead of leaving the banner off-screen at the top.
+  useEffect(() => {
+    if (error) {
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [error]);
 
   function selectImageFile(file: File | null) {
     if (previewUrlRef.current) {
@@ -199,7 +208,11 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+        <div
+          ref={errorRef}
+          role="alert"
+          className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800"
+        >
           {error}
         </div>
       )}
@@ -249,7 +262,7 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
             <img
               src={previewUrl}
               alt="Featured image preview"
-              className="max-h-60 w-full rounded-md border border-gray-300 object-cover"
+              className="aspect-[16/9] max-h-[420px] w-full rounded-md border border-gray-300 object-cover"
             />
             <button
               type="button"

@@ -89,7 +89,7 @@ function buildArticleHtml(item: PageItem, chrome: LayoutChrome): string {
   const mutedColor = "rgb(107,114,128)";
 
   const bodyHtml = body
-    ? `<p style="margin:4px 0 0;white-space:pre-wrap;font-size:11px;color:${bodyColor};text-align:justify;line-height:1.625;">${body}</p>`
+    ? `<p style="margin:4px 0 0;white-space:pre-wrap;font-size:11px;color:${bodyColor};text-align:justify;line-height:1.625;overflow-wrap:anywhere;">${body}</p>`
     : "";
 
   // Fixed aspect ratio + max-height keeps the measured height deterministic
@@ -117,7 +117,7 @@ function buildArticleHtml(item: PageItem, chrome: LayoutChrome): string {
   return [
     `<div style="border-bottom:1px solid ${borderColor};padding-bottom:12px;margin-bottom:16px;font-size:12px;line-height:1.625;">`,
     '<div style="break-inside:avoid;">',
-    `<h2 style="font-family:&#39;Notable&#39;,&#39;Special Elite&#39;,system-ui,serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;text-align:center;margin:0;line-height:1.4;">${title}</h2>`,
+    `<h2 style="font-family:&#39;Notable&#39;,&#39;Special Elite&#39;,system-ui,serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;text-align:center;margin:0;line-height:1.4;overflow-wrap:anywhere;">${title}</h2>`,
     '<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;">',
     `<div style="height:1px;width:32px;background:${borderColor};"></div>`,
     `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.025em;color:${mutedColor};text-align:center;padding:8px;margin:0;">${byline}</p>`,
