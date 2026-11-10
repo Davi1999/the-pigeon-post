@@ -68,7 +68,7 @@ export function HomePage({
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
       <div className="min-w-0" aria-busy={loading}>
-        <div className="mb-6 flex flex-wrap gap-2 lg:hidden">
+        <div className="mb-6 flex flex-wrap justify-center gap-2 lg:hidden">
           <Link
             href="/new-post"
             className={buttonVariants({ variant: "primary", size: "sm" })}
