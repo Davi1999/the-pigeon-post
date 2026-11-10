@@ -89,11 +89,19 @@
   --divider-line: rgba(0, 0, 0, 0.45);
   --divider-text: rgba(0, 0, 0, 0.65);
   --divider-border: rgba(0, 0, 0, 0.55);
+  /* Muted text tokens. Each stays above WCAG AA on its own background. */
+  --muted-soft: #756c5e;
+  --muted: #635b4e;
+  --muted-strong: #4b453b;
+  color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted-soft: var(--muted-soft);
+  --color-muted: var(--muted);
+  --color-muted-strong: var(--muted-strong);
   --font-sans: "Special Elite", system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono);
@@ -104,8 +112,13 @@
     --background: #16130d;
     --foreground: #f5ecd8;
     --divider-line: rgba(245, 236, 216, 0.45);
-    --divider-text: rgba(245, 236, 216, 0.65);
+    --divider-text: rgba(245, 236, 216, 0.75);
     --divider-border: rgba(245, 236, 216, 0.55);
+    /* Lift the grays well clear of the dark newsprint so small copy reads. */
+    --muted-soft: #b9ae9b;
+    --muted: #cdc1ac;
+    --muted-strong: #e6dac4;
+    color-scheme: dark;
   }
 }
 
@@ -114,6 +127,28 @@ body {
   color: var(--foreground);
   font-family: "Special Elite", system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
+}
+
+/* Form fields inherit the page palette instead of the browser default, which
+   would otherwise leave light text on a white field in dark mode. */
+input,
+textarea,
+select {
+  color: inherit;
+}
+
+::placeholder {
+  color: var(--muted-soft);
+  opacity: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    background-color: color-mix(in srgb, var(--foreground) 6%, transparent);
+    border-color: var(--divider-border);
+  }
 }
 
 /* Keep every image monochrome — user content, illustrations and logos alike —
@@ -147,6 +182,13 @@ img {
   flex: 1;
   min-height: 0;
   width: 100%;
+}
+
+@media (max-width: 639px) {
+  /* Keep the mobile header to a single masthead column. */
+  .newspaper-header-side {
+    display: none;
+  }
 }
 
 .newspaper-header-center {
@@ -238,7 +280,7 @@ img {
   font-weight: 400;
 }
 
-/* Main front-page headline (below masthead) */
+/* Front-page headline and columns used by the sign-in landing page. */
 
 .newspaper-main-headline-section {
   text-align: center;
@@ -283,50 +325,10 @@ img {
   margin-top: 2px;
 }
 
-
 .newspaper-columns {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: 0;
-}
-
-.dashboard-columns {
-  position: relative;
-}
-
-@media (min-width: 768px) {
-  .dashboard-columns::before,
-  .dashboard-columns::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background-color: #000;
-    pointer-events: none;
-    z-index: 10;
-  }
-
-  .dashboard-columns::before {
-    left: 50%;
-  }
-
-  .dashboard-columns::after {
-    display: none;
-  }
-}
-
-@media (min-width: 1024px) {
-  .dashboard-columns::before {
-    /* Center in first gap: column ends at ~33.333% - 1rem, gap center +0.75rem */
-    left: calc(33.333% - 0.25rem - 0.5px);
-  }
-
-  .dashboard-columns::after {
-    display: block;
-    /* Center in second gap: column ends at ~66.666% - 0.5rem, gap center +0.75rem */
-    left: calc(66.666% + 0.25rem - 0.5px);
-  }
 }
 
 .newspaper-column {
@@ -351,16 +353,6 @@ img {
   text-transform: uppercase;
   font-weight: 600;
   margin-bottom: 0.5rem;
-}
-
-.font-notable {
-  font-family: "Notable", "Special Elite",
-    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", serif;
-}
-
-.font-diplomata {
-  font-family: "Diplomata", "Notable", "Special Elite",
-    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", serif;
 }
 
 .newspaper-article-tagline {
@@ -473,30 +465,66 @@ img {
   }
 }
 
-/* Newspaper paged layout (desktop) */
+.font-notable {
+  font-family: "Notable", "Special Elite",
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", serif;
+}
 
-/* column-gap must match NEWSPAPER_COLUMN_GAP_PX in dashboard/newspaperLayout.ts (1.5rem ≈ 24px at 16px root). */
-.newspaper-paged-columns {
-  column-count: 3;
+.font-diplomata {
+  font-family: "Diplomata", "Notable", "Special Elite",
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", serif;
+}
+
+/* Front-page feed.
+ *
+ * A plain, auto-height multi-column flow. There is deliberately no fixed
+ * height, no off-screen measuring and no clipping: if a story is too long the
+ * column grows and the page simply scrolls. The browser balances the columns,
+ * so all three start at the top of the page.
+ */
+.newspaper-feed-columns {
+  column-count: 1;
   column-gap: 1.5rem;
-  column-fill: auto;
   column-rule: 1px solid var(--divider-line);
 }
 
-.newspaper-paged-columns > article {
-  margin-bottom: 1rem;
+.newspaper-feed-columns > article {
+  break-inside: avoid;
 }
 
-.newspaper-paged-columns > article:last-child {
-  margin-bottom: 0;
-  border-bottom: 0;
+@media (min-width: 768px) {
+  .newspaper-feed-columns {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 1280px) {
+  .newspaper-feed-columns {
+    column-count: 3;
+  }
 }
 
 .post-article-body {
   color: #222222;
-  /* Long URLs/unbroken tokens must wrap inside newspaper columns and the
-     single-column feed instead of forcing horizontal page scroll. */
+  text-align: justify;
+  text-justify: inter-word;
+  /* Long URLs/unbroken tokens must wrap inside the columns instead of forcing
+     horizontal page scroll. */
   overflow-wrap: anywhere;
+}
+
+/* Long-form article pages read better left-aligned across the wider column. */
+.post-article-body--detail {
+  text-align: left;
+}
+
+/* Feed cards show a bounded excerpt so one long story cannot dominate a column. */
+.post-card-excerpt {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 12;
+  line-clamp: 12;
+  overflow: hidden;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -511,15 +539,4 @@ img {
     filter: brightness(0) saturate(100%) invert(92%) sepia(9%) saturate(531%) hue-rotate(322deg)
       brightness(104%) contrast(96%);
   }
-}
-
-.continued-from-tag {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-style: italic;
-  text-align: center;
-  padding: 4px 0 6px;
-  color: var(--divider-text);
-  break-inside: avoid;
 }

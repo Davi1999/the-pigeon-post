@@ -53,10 +53,12 @@ const MAX_PAGE_SIZE = 50;
  * Parse cursor from "ISO_DATE:uuid" format.
  */
 function parseCursor(cursor: string): { createdAt: Date; id: string } | null {
-  const colon = cursor.indexOf(":");
-  if (colon === -1) return null;
-  const createdAt = new Date(cursor.slice(0, colon));
-  const id = cursor.slice(colon + 1);
+  // ISO timestamps contain colons, so split on the last one: the id (a UUID)
+  // never contains a colon.
+  const separator = cursor.lastIndexOf(":");
+  if (separator === -1) return null;
+  const createdAt = new Date(cursor.slice(0, separator));
+  const id = cursor.slice(separator + 1);
   if (Number.isNaN(createdAt.getTime()) || !id) return null;
   return { createdAt, id };
 }

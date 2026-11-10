@@ -55,26 +55,26 @@ function CommentForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-3 space-y-2 border border-dashed border-black/30 bg-[#f5ecd8]/40 p-3 text-xs"
+      className="mt-3 space-y-2 border border-dashed border-black/30 bg-[#f5ecd8]/40 p-3 text-xs dark:border-foreground/30 dark:bg-foreground/10"
     >
-      <label className="block text-[10px] font-semibold uppercase tracking-wide text-gray-600">
+      <label className="block text-[10px] font-semibold uppercase tracking-wide text-muted-strong">
         {label}
       </label>
       <textarea
-        className="mt-1 block h-24 w-full resize-vertical border border-black/40 bg-white px-2 py-1 text-[11px] leading-relaxed text-justify outline-none focus-visible:ring-2 focus-visible:ring-black"
+        className="mt-1 block h-24 w-full resize-vertical border border-black/40 bg-white px-2 py-1 text-[11px] leading-relaxed text-justify text-foreground outline-none placeholder:text-muted-soft focus-visible:ring-2 focus-visible:ring-foreground dark:border-foreground/40 dark:bg-foreground/5"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         autoFocus={autoFocus}
         disabled={submitting}
       />
       {error ? (
-        <p className="text-[10px] text-red-600">{error}</p>
+        <p className="text-[10px] text-red-600 dark:text-red-400">{error}</p>
       ) : null}
       <div className="flex items-center gap-2">
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center justify-center border border-black/40 bg-black px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#f5ecd8] disabled:opacity-60"
+          className="inline-flex items-center justify-center border border-black/40 bg-foreground px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-60 dark:border-foreground/60"
         >
           {submitting ? "Publishing…" : "Publish"}
         </button>
@@ -82,7 +82,7 @@ function CommentForm({
           type="button"
           onClick={onCancel}
           disabled={submitting}
-          className="text-[10px] uppercase tracking-wide text-gray-600 underline underline-offset-2 disabled:opacity-60"
+          className="text-[10px] uppercase tracking-wide text-muted-strong underline underline-offset-2 disabled:opacity-60"
         >
           Cancel
         </button>
@@ -146,17 +146,17 @@ export function PostCommentsSection({
         key={comment.id}
         className={
           isTopLevel
-            ? "space-y-2 border-b border-black/40 pb-3 last:border-b-0"
+            ? "space-y-2 border-b border-black/40 pb-3 last:border-b-0 dark:border-foreground/30"
             : "space-y-1"
         }
       >
         {comment.replySnippet ? (
-          <p className="text-[10px] uppercase tracking-wide text-gray-500">
+          <p className="text-[10px] uppercase tracking-wide text-muted">
             Responding to: &ldquo;{comment.replySnippet}&rdquo;
           </p>
         ) : null}
         <header className="space-y-0.5">
-          <p className="text-[10px] uppercase tracking-wide text-gray-500 text-center">
+          <p className="text-[10px] uppercase tracking-wide text-muted text-center">
             {`By ${comment.authorDisplayName}`}
             {dateLabel ? ` — ${dateLabel}` : null}
           </p>
@@ -196,7 +196,7 @@ export function PostCommentsSection({
         ) : null}
 
         {replies.length > 0 ? (
-          <div className="mt-3 space-y-3 pl-4 border-l-2 border-black/20">
+          <div className="mt-3 space-y-3 pl-4 border-l-2 border-black/20 dark:border-foreground/25">
             {replies.map((reply) =>
               renderCommentThread(reply, false),
             )}
@@ -242,9 +242,9 @@ export function PostCommentsSection({
   }
 
   return (
-    <section className="space-y-4 border-t border-black pt-4 text-xs leading-relaxed">
+    <section className="space-y-4 border-t border-black pt-4 text-xs leading-relaxed dark:border-foreground">
       <header className="text-center">
-        <p className="text-[10px] uppercase tracking-[0.25em] text-gray-600">
+        <p className="text-[10px] uppercase tracking-[0.25em] text-muted-strong">
           Responses
         </p>
       </header>
@@ -276,7 +276,7 @@ export function PostCommentsSection({
         {topLevelComments.map((comment) => renderCommentThread(comment, true))}
 
         {topLevelComments.length === 0 && !articleFormOpen ? (
-          <p className="text-[10px] text-center text-gray-500">
+          <p className="text-[10px] text-center text-muted">
             No responses yet. Be the first to add your thoughts to this story.
           </p>
         ) : null}

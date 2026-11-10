@@ -53,7 +53,7 @@ export default async function UpdatesPage() {
 
       <section className="space-y-4">
         {updates.length === 0 ? (
-          <p className="text-center text-xs text-gray-600">
+          <p className="text-center text-xs text-muted-strong">
             No updates just yet. Check back soon for the latest headlines.
           </p>
         ) : (
@@ -66,7 +66,7 @@ export default async function UpdatesPage() {
                 <h2 className="text-base font-semibold uppercase tracking-wide">
                   {update.title}
                 </h2>
-                <p className="text-[10px] uppercase tracking-wide text-gray-500">
+                <p className="text-[10px] uppercase tracking-wide text-muted">
                   {update.createdAt.toLocaleDateString("en-US", {
                     month: "long",
                     day: "numeric",

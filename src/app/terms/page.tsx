@@ -9,7 +9,7 @@ export default function TermsOfServicePage() {
     <div className="mx-auto max-w-3xl px-4 py-10 space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Terms of Service</h1>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-muted">
         Last updated: {new Date().toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",

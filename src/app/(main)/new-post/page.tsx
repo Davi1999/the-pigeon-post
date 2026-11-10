@@ -27,7 +27,7 @@ export default async function NewPostPage() {
           <h1 className="text-2xl font-semibold tracking-tight">
             Write a new post
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted">
             Share a long-form dispatch with your friends. Plain text body up to
             10,000 characters, plus an optional featured image.
           </p>
