@@ -134,7 +134,7 @@ export function FeatureRequestsClient({ initialRequests }: Props) {
         <h2 className="text-sm font-semibold uppercase tracking-wide">
           Request a new feature
         </h2>
-        <p className="mt-1 text-[11px] text-gray-600">
+        <p className="mt-1 text-[11px] text-muted-strong">
           Tell us what you&apos;d like to see next in The Pigeon Post. The most
           liked ideas rise to the top of the stack.
         </p>
@@ -142,7 +142,7 @@ export function FeatureRequestsClient({ initialRequests }: Props) {
           <div className="space-y-1">
             <label
               htmlFor="title"
-              className="text-[10px] font-semibold uppercase tracking-wide text-gray-600"
+              className="text-[10px] font-semibold uppercase tracking-wide text-muted-strong"
             >
               Headline
             </label>
@@ -150,7 +150,7 @@ export function FeatureRequestsClient({ initialRequests }: Props) {
               id="title"
               name="title"
               type="text"
-              className="w-full border px-2 py-1 text-xs"
+              className="w-full border bg-background px-2 py-1 text-xs text-foreground placeholder:text-muted-soft focus:outline-none focus:ring-1 focus:ring-foreground"
               maxLength={200}
               required
             />
@@ -158,14 +158,14 @@ export function FeatureRequestsClient({ initialRequests }: Props) {
           <div className="space-y-1">
             <label
               htmlFor="description"
-              className="text-[10px] font-semibold uppercase tracking-wide text-gray-600"
+              className="text-[10px] font-semibold uppercase tracking-wide text-muted-strong"
             >
               Description
             </label>
             <textarea
               id="description"
               name="description"
-              className="w-full border px-2 py-1 text-xs"
+              className="w-full border bg-background px-2 py-1 text-xs text-foreground placeholder:text-muted-soft focus:outline-none focus:ring-1 focus:ring-foreground"
               rows={4}
               maxLength={5000}
               required
@@ -185,7 +185,7 @@ export function FeatureRequestsClient({ initialRequests }: Props) {
 
       <section className="space-y-3">
         {requests.length === 0 ? (
-          <p className="text-center text-xs text-gray-600">
+          <p className="text-center text-xs text-muted-strong">
             No feature requests yet. Be the first to file a story.
           </p>
         ) : (
@@ -199,7 +199,7 @@ export function FeatureRequestsClient({ initialRequests }: Props) {
                   <h3 className="text-sm font-semibold uppercase tracking-wide">
                     {request.title}
                   </h3>
-                  <p className="text-[10px] uppercase tracking-wide text-gray-500">
+                  <p className="text-[10px] uppercase tracking-wide text-muted">
                     {new Date(request.createdAt).toLocaleDateString("en-US", {
                       month: "long",
                       day: "numeric",

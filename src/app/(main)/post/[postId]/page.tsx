@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getPostForUser } from "@/lib/feed";
 import { getCommentsForPost } from "@/lib/comments";
-import { PostArticle } from "../../dashboard/PostArticle";
+import { PostCard } from "../../dashboard/PostCard";
 import { PostCommentsSection } from "./PostCommentsSection";
 
 async function requireSession() {
@@ -46,15 +46,12 @@ export default async function PostPage({
           </h1>
         </header>
 
-        <PostArticle
-          postId={post.id}
-          title={post.title}
-          body={post.body}
-          featuredImage={post.featuredImage}
-          authorDisplayName={post.authorDisplayName}
-          createdAt={post.createdAt}
-          isOwnPost={post.isOwnPost}
-          showContinueButton={false}
+        <PostCard
+          post={{
+            ...post,
+            createdAt: post.createdAt.toISOString(),
+          }}
+          variant="detail"
         />
 
         <PostCommentsSection

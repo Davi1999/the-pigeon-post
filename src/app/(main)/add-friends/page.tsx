@@ -441,11 +441,11 @@ export default async function AddFriendsPage({
             <h1 className="text-2xl font-semibold tracking-tight">
               Add friends
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted">
               Send and manage friend requests.
             </p>
           </div>
-          <p className="break-words text-sm text-gray-500 sm:text-right">
+          <p className="break-words text-sm text-muted sm:text-right">
             Signed in as{" "}
             <span className="font-medium text-foreground">{user.email}</span>
           </p>
@@ -468,7 +468,7 @@ export default async function AddFriendsPage({
           <section className="space-y-4 rounded-md border bg-background p-4">
             <header className="space-y-1">
               <h2 className="text-lg font-semibold">Send friend requests</h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 Enter a friend&apos;s email address to send a request.
               </p>
             </header>
@@ -486,24 +486,24 @@ export default async function AddFriendsPage({
                   name="email"
                   type="email"
                   required
-                  className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                  className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-foreground shadow-sm placeholder:text-muted-soft focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground dark:border-foreground/40 dark:bg-foreground/5"
                   placeholder="friend@example.com"
                 />
               </div>
               <button
                 type="submit"
-                className="inline-flex w-full items-center justify-center rounded-md bg-black px-3 py-2 text-sm font-medium text-white hover:bg-gray-900"
+                className="inline-flex w-full items-center justify-center rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background hover:bg-foreground/90"
               >
                 Send request
               </button>
             </form>
 
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700">
+              <h3 className="text-sm font-medium text-muted-strong">
                 Pending requests you&apos;ve sent
               </h3>
               {outboundRequests.length === 0 ? (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted">
                   You haven&apos;t sent any friend requests yet.
                 </p>
               ) : (
@@ -524,11 +524,11 @@ export default async function AddFriendsPage({
                       >
                         <div>
                           <div className="font-medium">{displayName}</div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-muted">
                             {request.receiverEmail}
                           </div>
                         </div>
-                        <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        <span className="text-xs font-medium uppercase tracking-wide text-muted">
                           Pending
                         </span>
                       </li>
@@ -539,14 +539,14 @@ export default async function AddFriendsPage({
             </div>
 
             <div className="space-y-2 border-t pt-4">
-              <h3 className="text-sm font-medium text-gray-700">
+              <h3 className="text-sm font-medium text-muted-strong">
                 People you may know
               </h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted">
                 Users you have 2+ mutual friends with.
               </p>
               {peopleYouMayKnow.length === 0 ? (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted">
                   No recommendations right now. Add more friends to see people you
                   may know.
                 </p>
@@ -572,7 +572,7 @@ export default async function AddFriendsPage({
                           />
                           <button
                             type="submit"
-                            className="w-full rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900"
+                            className="w-full rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:bg-foreground/90"
                           >
                             Send friend request
                           </button>
@@ -589,13 +589,13 @@ export default async function AddFriendsPage({
           <section className="space-y-4 rounded-md border bg-background p-4">
             <header className="space-y-1">
               <h2 className="text-lg font-semibold">Incoming requests</h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 Approve or decline requests from other users.
               </p>
             </header>
 
             {inboundRequests.length === 0 ? (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 You don&apos;t have any incoming friend requests right now.
               </p>
             ) : (
@@ -614,7 +614,7 @@ export default async function AddFriendsPage({
                     >
                       <div>
                         <div className="font-medium">{displayName}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted">
                           {request.senderEmail}
                         </div>
                       </div>
@@ -635,7 +635,7 @@ export default async function AddFriendsPage({
                           />
                           <button
                             type="submit"
-                            className="inline-flex w-full items-center justify-center rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900"
+                            className="inline-flex w-full items-center justify-center rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:bg-foreground/90"
                           >
                             Accept
                           </button>
@@ -656,7 +656,7 @@ export default async function AddFriendsPage({
                           />
                           <button
                             type="submit"
-                            className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                            className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-muted-strong hover:bg-gray-50 dark:border-foreground/40 dark:bg-transparent dark:text-foreground dark:hover:bg-foreground/10"
                           >
                             Reject
                           </button>
@@ -673,13 +673,13 @@ export default async function AddFriendsPage({
           <section className="space-y-4 rounded-md border bg-background p-4">
             <header className="space-y-1">
               <h2 className="text-lg font-semibold">Your friends</h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 A list of everyone you&apos;re connected with.
               </p>
             </header>
 
             {friends.length === 0 ? (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 You don&apos;t have any friends yet. Send a request to get
                 started.
               </p>
@@ -699,7 +699,7 @@ export default async function AddFriendsPage({
                     >
                       <div>
                         <div className="font-medium">{displayName}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted">
                           {friend.email}
                         </div>
                       </div>
@@ -711,7 +711,7 @@ export default async function AddFriendsPage({
                         />
                         <button
                           type="submit"
-                          className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                          className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-muted-strong hover:bg-gray-50 dark:border-foreground/40 dark:bg-transparent dark:text-foreground dark:hover:bg-foreground/10"
                         >
                           Remove
                         </button>

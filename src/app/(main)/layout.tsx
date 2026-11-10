@@ -1,8 +1,5 @@
 // src/app/(main)/layout.tsx
 
-import Link from "next/link";
-import { SignOutButton } from "@/components/auth/SignOutButton";
-
 export default function MainLayout({
   children,
 }: {

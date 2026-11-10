@@ -1,6 +1,6 @@
  "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { ExtraExtraToast } from "@/components/ui/ExtraExtraToast";
 
@@ -16,11 +16,11 @@ type ApiResponse = {
 };
 
 export function DashboardNotifications() {
-  const [hasFetched, setHasFetched] = useState(false);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    if (hasFetched) return;
-    setHasFetched(true);
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
     async function fetchNotification() {
       try {
@@ -61,7 +61,7 @@ export function DashboardNotifications() {
     }
 
     void fetchNotification();
-  }, [hasFetched]);
+  }, []);
 
   return null;
 }

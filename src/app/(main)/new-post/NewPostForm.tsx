@@ -202,7 +202,7 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-1">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted">
           Posting as <span className="font-medium text-foreground">{authorName}</span>
         </p>
       </div>
@@ -229,17 +229,17 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
           required
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+          className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-foreground shadow-sm placeholder:text-muted-soft focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground dark:border-foreground/40 dark:bg-foreground/5"
           placeholder="Give your post a headline"
         />
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-soft">
           Up to 200 characters. Make it punchy and clear.
         </p>
       </div>
 
       <div className="space-y-2">
         <label htmlFor="featuredImage" className="block text-sm font-medium">
-          Featured image <span className="font-normal text-gray-400">(optional)</span>
+          Featured image <span className="font-normal text-muted-soft">(optional)</span>
         </label>
         <input
           ref={fileInputRef}
@@ -249,26 +249,26 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
           accept="image/jpeg,image/png,image/webp"
           onChange={handleImageChange}
           disabled={isSubmitting}
-          className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border file:border-gray-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+          className="block w-full text-sm text-muted file:mr-3 file:rounded-md file:border file:border-gray-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-muted-strong hover:file:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70 dark:file:border-foreground/40 dark:file:bg-foreground/10 dark:file:text-foreground dark:hover:file:bg-foreground/20"
         />
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-soft">
           JPEG, PNG, or WebP. Large images are resized automatically before upload.
         </p>
         {imageError && (
-          <p className="text-xs text-red-600">{imageError}</p>
+          <p className="text-xs text-red-600 dark:text-red-400">{imageError}</p>
         )}
         {previewUrl && (
           <div className="space-y-2">
             <img
               src={previewUrl}
               alt="Featured image preview"
-              className="aspect-[16/9] max-h-[420px] w-full rounded-md border border-gray-300 object-cover"
+              className="aspect-[16/9] max-h-[420px] w-full rounded-md border border-gray-300 object-cover dark:border-foreground/40"
             />
             <button
               type="button"
               onClick={clearImage}
               disabled={isSubmitting}
-              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-muted-strong hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70 dark:border-foreground/40 dark:bg-transparent dark:text-foreground dark:hover:bg-foreground/10"
             >
               Remove image
             </button>
@@ -288,18 +288,18 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
           required
           value={body}
           onChange={(event) => setBody(event.target.value)}
-          className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+          className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-foreground shadow-sm placeholder:text-muted-soft focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground dark:border-foreground/40 dark:bg-foreground/5"
           placeholder="Write your dispatch here. Plain text only."
         />
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-muted">
           <span>
             {body.length.toLocaleString()} / {maxLength.toLocaleString()} characters
           </span>
           <span
             className={
               remaining <= Math.floor(maxLength * 0.1)
-                ? "font-medium text-red-600"
-                : "text-gray-400"
+                ? "font-medium text-red-600 dark:text-red-400"
+                : "text-muted-soft"
             }
           >
             {remaining.toLocaleString()} characters remaining
@@ -310,7 +310,7 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
       <div className="flex items-center justify-end gap-3">
         <button
           type="button"
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-muted-strong hover:bg-gray-50 dark:border-foreground/40 dark:bg-transparent dark:text-foreground dark:hover:bg-foreground/10"
           onClick={() => {
             setTitle("");
             setBody("");
@@ -324,7 +324,7 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex items-center justify-center rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSubmitting ? "Publishing…" : "Publish post"}
         </button>

@@ -63,7 +63,7 @@ export default async function RootLayout({
             dateLine={dateLine}
           />
           <main className="mx-auto max-w-6xl flex-1 w-full">{children}</main>
-          <footer className="mx-auto max-w-6xl w-full px-4 pb-8 pt-6 text-xs text-muted-foreground flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-t border-black">
+          <footer className="mx-auto max-w-6xl w-full px-4 pb-8 pt-6 text-xs text-muted flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-t border-black dark:border-foreground/50">
             <div>© {new Date().getFullYear()} The Pigeon Post.</div>
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               <a href="/terms" className="underline-offset-2 hover:underline">

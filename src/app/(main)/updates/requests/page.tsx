@@ -36,7 +36,7 @@ export default async function FeatureRequestsPage() {
         <h1 className="text-xl font-semibold uppercase tracking-[0.1em] font-diplomata sm:text-2xl sm:tracking-[0.3em]">
           Feature Requests
         </h1>
-        <p className="mt-1 text-[11px] text-gray-600">
+        <p className="mt-1 text-[11px] text-muted-strong">
           File your requests and vote for what should land next.
         </p>
       </header>
