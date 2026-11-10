@@ -33,7 +33,7 @@ export default async function FeatureRequestsPage() {
   return (
     <div className="space-y-6 py-6">
       <header className="border-b border-black pb-4 text-center dark:border-[#f5ecd8]">
-        <h1 className="text-2xl font-semibold uppercase tracking-[0.3em] font-diplomata">
+        <h1 className="text-xl font-semibold uppercase tracking-[0.1em] font-diplomata sm:text-2xl sm:tracking-[0.3em]">
           Feature Requests
         </h1>
         <p className="mt-1 text-[11px] text-gray-600">

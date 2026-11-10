@@ -436,7 +436,7 @@ export default async function AddFriendsPage({
   return (
     <div className="px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
               Add friends
@@ -445,7 +445,7 @@ export default async function AddFriendsPage({
               Send and manage friend requests.
             </p>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="break-words text-sm text-gray-500 sm:text-right">
             Signed in as{" "}
             <span className="font-medium text-foreground">{user.email}</span>
           </p>

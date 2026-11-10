@@ -52,7 +52,7 @@ export function HeaderShell({
               <div className="newspaper-welcome-box">
                 <div className="newspaper-welcome-text">Weather</div>
                 <div className="newspaper-welcome-text-small">
-                  Clear skies, high likelyhood
+                  Clear skies, high likelihood
                 </div>
                 <div className="newspaper-welcome-text-small">
                   of connecting with friends.

@@ -488,6 +488,9 @@ body {
 
 .post-article-body {
   color: #222222;
+  /* Long URLs/unbroken tokens must wrap inside newspaper columns and the
+     single-column feed instead of forcing horizontal page scroll. */
+  overflow-wrap: anywhere;
 }
 
 @media (prefers-color-scheme: dark) {

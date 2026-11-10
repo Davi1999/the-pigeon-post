@@ -40,14 +40,17 @@ export function PostArticle({
   const showImage = Boolean(featuredImage) && !continuedFromTitle;
 
   return (
-    <article className="space-y-1 border-b border-black dark:border-[#f5ecd8] pb-3 text-xs leading-relaxed last:border-b-0">
+    <article
+      data-post-id={postId}
+      className="space-y-1 border-b border-black dark:border-[#f5ecd8] pb-3 text-xs leading-relaxed last:border-b-0"
+    >
       {continuedFromTitle ? (
         <div className="continued-from-tag">
           Continued from &ldquo;{continuedFromTitle}&rdquo;
         </div>
       ) : (
         <header className="space-y-0.5" style={{ breakInside: "avoid" }}>
-          <h2 className="text-base font-semibold uppercase tracking-wide text-center font-notable">
+          <h2 className="text-base font-semibold uppercase tracking-wide text-center font-notable break-words">
             {displayTitle}
           </h2>
           <div className="mt-1 flex flex-col items-center gap-0.5 pb-2 pt-2">
