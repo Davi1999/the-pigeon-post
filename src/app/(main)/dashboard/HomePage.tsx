@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 import { buttonVariants } from "@/components/ui/Button";
 import { HomeFeed } from "./HomeFeed";
 import type { FeedPage, FeedPostSerialized } from "./types";
@@ -80,6 +81,7 @@ export function HomePage({
           >
             Add friends
           </Link>
+          <SignOutButton />
         </div>
 
         {batches.length === 0 ? (
