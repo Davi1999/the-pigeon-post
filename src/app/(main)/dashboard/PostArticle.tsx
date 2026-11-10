@@ -4,6 +4,7 @@ type PostArticleProps = {
   postId: string;
   title: string;
   body: string;
+  featuredImage?: string | null;
   authorDisplayName: string;
   createdAt: Date;
   isOwnPost: boolean;
@@ -27,6 +28,7 @@ export function PostArticle({
   postId,
   title,
   body,
+  featuredImage,
   authorDisplayName,
   createdAt,
   isOwnPost,
@@ -35,6 +37,7 @@ export function PostArticle({
 }: PostArticleProps) {
   const displayTitle = title || "Untitled story";
   const dateLabel = formatDate(createdAt);
+  const showImage = Boolean(featuredImage) && !continuedFromTitle;
 
   return (
     <article className="space-y-1 border-b border-black dark:border-[#f5ecd8] pb-3 text-xs leading-relaxed last:border-b-0">
@@ -55,6 +58,19 @@ export function PostArticle({
             </p>
             <div className="h-px w-8 bg-black dark:bg-[#f5ecd8]" />
           </div>
+          {showImage && featuredImage ? (
+            // Plain <img> (not next/image): the newspaper paginator renders
+            // the same markup as an HTML string and measures it off-screen,
+            // so both paths must match. The fixed aspect ratio reserves height
+            // before the image loads, keeping pagination stable.
+            <img
+              src={featuredImage}
+              alt={displayTitle}
+              loading="lazy"
+              decoding="async"
+              className="mt-3 aspect-[16/9] max-h-[420px] w-full border border-black object-cover dark:border-[#f5ecd8]"
+            />
+          ) : null}
         </header>
       )}
       <p className="post-article-body mt-1 whitespace-pre-wrap text-[11px] text-justify">

@@ -1,7 +1,17 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  FormEvent,
+  ChangeEvent,
+} from "react";
 import { useRouter } from "next/navigation";
+import {
+  PrepareImageError,
+  prepareImageForUpload,
+} from "@/lib/prepareImage";
 
 interface NewPostFormProps {
   authorName: string;
@@ -12,10 +22,109 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  /** Reuses an already-uploaded file when retrying a failed post creation. */
+  const uploadedImageRef = useRef<{ file: File; path: string } | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
+
   const remaining = maxLength - body.length;
+
+  // Revoke the last object URL when the form unmounts.
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+    };
+  }, []);
+
+  function selectImageFile(file: File | null) {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+
+    setImageFile(file);
+
+    if (!file) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    previewUrlRef.current = objectUrl;
+    setPreviewUrl(objectUrl);
+  }
+
+  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setImageError(null);
+    uploadedImageRef.current = null;
+
+    if (!file) {
+      selectImageFile(null);
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      selectImageFile(null);
+      setImageError("Choose a JPEG, PNG, or WebP image.");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    selectImageFile(file);
+  }
+
+  function clearImage() {
+    selectImageFile(null);
+    setImageError(null);
+    uploadedImageRef.current = null;
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
+  async function uploadImage(file: File): Promise<string> {
+    if (uploadedImageRef.current?.file === file) {
+      return uploadedImageRef.current.path;
+    }
+
+    const prepared = await prepareImageForUpload(file);
+    const formData = new FormData();
+    formData.append("file", prepared);
+
+    const response = await fetch("/api/uploads", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      throw new Error(
+        (data && typeof data.error === "string" && data.error) ||
+          "Unable to upload the featured image. Please try again.",
+      );
+    }
+
+    const data = (await response.json()) as { path?: string };
+
+    if (!data.path) {
+      throw new Error("Unable to upload the featured image. Please try again.");
+    }
+
+    uploadedImageRef.current = { file, path: data.path };
+    return data.path;
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -42,6 +151,12 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
     setIsSubmitting(true);
 
     try {
+      let featuredImagePath: string | null = null;
+
+      if (imageFile) {
+        featuredImagePath = await uploadImage(imageFile);
+      }
+
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: {
@@ -50,6 +165,7 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
         body: JSON.stringify({
           title: trimmedTitle,
           body: trimmedBody,
+          ...(featuredImagePath ? { featuredImagePath } : {}),
         }),
       });
 
@@ -64,8 +180,12 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
       }
 
       router.push("/dashboard");
-    } catch {
-      setError("Something went wrong while saving your post. Please try again.");
+    } catch (caught) {
+      setError(
+        caught instanceof PrepareImageError || caught instanceof Error
+          ? caught.message
+          : "Something went wrong while saving your post. Please try again.",
+      );
       setIsSubmitting(false);
     }
   }
@@ -102,6 +222,45 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
         <p className="text-xs text-gray-400">
           Up to 200 characters. Make it punchy and clear.
         </p>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="featuredImage" className="block text-sm font-medium">
+          Featured image <span className="font-normal text-gray-400">(optional)</span>
+        </label>
+        <input
+          ref={fileInputRef}
+          id="featuredImage"
+          name="featuredImage"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleImageChange}
+          disabled={isSubmitting}
+          className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border file:border-gray-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+        />
+        <p className="text-xs text-gray-400">
+          JPEG, PNG, or WebP. Large images are resized automatically before upload.
+        </p>
+        {imageError && (
+          <p className="text-xs text-red-600">{imageError}</p>
+        )}
+        {previewUrl && (
+          <div className="space-y-2">
+            <img
+              src={previewUrl}
+              alt="Featured image preview"
+              className="max-h-60 w-full rounded-md border border-gray-300 object-cover"
+            />
+            <button
+              type="button"
+              onClick={clearImage}
+              disabled={isSubmitting}
+              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              Remove image
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -143,6 +302,7 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
             setTitle("");
             setBody("");
             setError(null);
+            clearImage();
           }}
           disabled={isSubmitting}
         >
@@ -159,4 +319,3 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
     </form>
   );
 }
-

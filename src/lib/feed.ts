@@ -1,16 +1,50 @@
 import { db } from "@/lib/db";
 import { friendRequests, posts } from "@/db/schema";
 import { user as userTable } from "@/db/auth-schema";
+import { isPostImagePath } from "@/lib/postImages";
+import { buildPublicImageUrl } from "@/lib/supabase-admin";
 import { and, desc, eq, inArray, lt, or } from "drizzle-orm";
 
 export type FeedPost = {
   id: string;
   title: string;
   body: string;
+  featuredImage: string | null;
   authorDisplayName: string;
   createdAt: Date;
   isOwnPost: boolean;
 };
+
+type ParsedPostContent = {
+  title: string;
+  body: string;
+  featuredImage: string | null;
+};
+
+/**
+ * Posts store `{ title, body, featuredImagePath }` as JSON in posts.content.
+ * Only a validated storage path is accepted; the public URL is built here so
+ * arbitrary remote image URLs can never reach the renderer.
+ */
+function parsePostContent(content: string): ParsedPostContent {
+  try {
+    const parsed = JSON.parse(content) as {
+      title?: unknown;
+      body?: unknown;
+      featuredImagePath?: unknown;
+    };
+
+    return {
+      title: typeof parsed.title === "string" ? parsed.title : "",
+      body: typeof parsed.body === "string" ? parsed.body : "",
+      featuredImage: isPostImagePath(parsed.featuredImagePath)
+        ? buildPublicImageUrl(parsed.featuredImagePath)
+        : null,
+    };
+  } catch {
+    return { title: "", body: content, featuredImage: null };
+  }
+}
 
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 50;
@@ -96,19 +130,7 @@ export async function getPostForUser(
     return null;
   }
 
-  let title = "";
-  let body = "";
-
-  try {
-    const parsed = JSON.parse(post.content) as {
-      title?: string;
-      body?: string;
-    };
-    title = parsed.title ?? "";
-    body = parsed.body ?? "";
-  } catch {
-    body = post.content;
-  }
+  const { title, body, featuredImage } = parsePostContent(post.content);
 
   const isOwnPost = post.authorId === currentUserId;
   const authorDisplayName =
@@ -122,6 +144,7 @@ export async function getPostForUser(
     id: post.id,
     title,
     body,
+    featuredImage,
     authorDisplayName,
     createdAt: post.createdAt,
     isOwnPost,
@@ -201,19 +224,7 @@ export async function getFeedPostsPage(
   const slice = hasMore ? rawPosts.slice(0, limit) : rawPosts;
 
   const postsList: FeedPost[] = slice.map((post) => {
-    let title = "";
-    let body = "";
-
-    try {
-      const parsed = JSON.parse(post.content) as {
-        title?: string;
-        body?: string;
-      };
-      title = parsed.title ?? "";
-      body = parsed.body ?? "";
-    } catch {
-      body = post.content;
-    }
+    const { title, body, featuredImage } = parsePostContent(post.content);
 
     const isOwnPost = post.authorId === currentUserId;
     const authorDisplayName =
@@ -227,6 +238,7 @@ export async function getFeedPostsPage(
       id: post.id,
       title,
       body,
+      featuredImage,
       authorDisplayName,
       createdAt: post.createdAt,
       isOwnPost,

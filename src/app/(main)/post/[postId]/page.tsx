@@ -50,6 +50,7 @@ export default async function PostPage({
           postId={post.id}
           title={post.title}
           body={post.body}
+          featuredImage={post.featuredImage}
           authorDisplayName={post.authorDisplayName}
           createdAt={post.createdAt}
           isOwnPost={post.isOwnPost}
