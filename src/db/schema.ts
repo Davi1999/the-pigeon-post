@@ -126,7 +126,10 @@ export const friendRequestStatusEnum = pgEnum("friend_request_status", [
       description: text("description").notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull(),
     },
-    (t) => [index("feature_requests_created_at_idx").on(t.createdAt)],
+    (t) => [
+      index("feature_requests_created_at_idx").on(t.createdAt),
+      index("feature_requests_author_id_idx").on(t.authorId),
+    ],
   );
   
   // ---------------------------------------------------------------------------
