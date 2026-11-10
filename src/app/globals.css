@@ -116,6 +116,12 @@ body {
     "Segoe UI", sans-serif;
 }
 
+/* Keep every image monochrome — user content, illustrations and logos alike —
+   so the whole site reads like a printed newspaper. */
+img {
+  filter: grayscale(100%);
+}
+
 .newspaper-page {
   background-color: var(--background);
   color: var(--foreground);
