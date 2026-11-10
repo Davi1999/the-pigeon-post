@@ -1,0 +1,1 @@
+CREATE INDEX "feature_requests_author_id_idx" ON "feature_requests" USING btree ("author_id");

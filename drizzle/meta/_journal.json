@@ -22,6 +22,20 @@
       "when": 1773669443536,
       "tag": "0002_lucky_lily_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794346888778,
+      "tag": "0003_add_feature_requests_author_idx",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794346890624,
+      "tag": "0004_harden_public_schema",
+      "breakpoints": true
     }
   ]
 }

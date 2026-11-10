@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
-const databaseUrl = process.env.DATABASE_URL!;
+const databaseUrl = process.env.DIRECT_URL ?? process.env.DATABASE_URL!;
 const isLocal = databaseUrl.includes("localhost");
 
 // Parse DATABASE_URL for drizzle CLI dbCredentials
