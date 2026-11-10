@@ -63,7 +63,7 @@ function formatDateStr(iso: string): string {
 /** Inline stand-in for `LetterButton` (default): image area + label + padding. */
 function continueConversationBlockHtml(): string {
   return [
-    '<div style="margin-top:12px;display:flex;justify-content:center;">',
+    '<div style="margin-top:16px;display:flex;justify-content:center;">',
     '<div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:8px 16px;',
     "text-transform:uppercase;letter-spacing:0.05em;font-size:12px;line-height:1.2;font-weight:600;",
     "border:1px solid rgba(0,0,0,0.4);background:#f5ecd8;color:#000;min-height:72px;justify-content:center;",
@@ -89,7 +89,7 @@ function buildArticleHtml(item: PageItem, chrome: LayoutChrome): string {
   const mutedColor = "rgb(107,114,128)";
 
   const bodyHtml = body
-    ? `<p style="margin:4px 0 0;white-space:pre-wrap;font-size:11px;color:${bodyColor};text-align:justify;line-height:1.625;overflow-wrap:anywhere;">${body}</p>`
+    ? `<p style="margin:8px 0 0;white-space:pre-wrap;font-size:11px;color:${bodyColor};text-align:justify;line-height:1.625;overflow-wrap:anywhere;">${body}</p>`
     : "";
 
   // Fixed aspect ratio + max-height keeps the measured height deterministic
@@ -117,8 +117,8 @@ function buildArticleHtml(item: PageItem, chrome: LayoutChrome): string {
   return [
     `<div style="border-bottom:1px solid ${borderColor};padding-bottom:12px;margin-bottom:16px;font-size:12px;line-height:1.625;">`,
     '<div style="break-inside:avoid;">',
-    `<h2 style="font-family:&#39;Notable&#39;,&#39;Special Elite&#39;,system-ui,serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;text-align:center;margin:0;line-height:1.4;overflow-wrap:anywhere;">${title}</h2>`,
-    '<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;">',
+    `<h2 style="font-family:&#39;Notable&#39;,&#39;Special Elite&#39;,system-ui,serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:0.025em;text-align:center;margin:0;line-height:1.5;overflow-wrap:anywhere;">${title}</h2>`,
+    '<div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;">',
     `<div style="height:1px;width:32px;background:${borderColor};"></div>`,
     `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.025em;color:${mutedColor};text-align:center;padding:8px;margin:0;">${byline}</p>`,
     `<div style="height:1px;width:32px;background:${borderColor};"></div>`,
@@ -133,22 +133,28 @@ function buildArticleHtml(item: PageItem, chrome: LayoutChrome): string {
 
 class PageMeasurer {
   el: HTMLDivElement;
-  private capacity: number;
 
   constructor(containerWidth: number, pageHeight: number, columnGap: number) {
-    const columnWidth = (containerWidth - 2 * columnGap) / 3;
-    // Be slightly conservative so we never place text that would end up
-    // below the visible page height in the real multi-column layout.
-    // Using a value just under 3 * pageHeight means we may leave a bit
-    // of whitespace at the bottom of the last column, but we avoid
-    // "lost" lines that are rendered but hidden by the page boundary.
-    this.capacity = pageHeight * 3 - 32;
+    // Measure the actual 3-column geometry, not a single long column.
+    // A single-column estimate assumes continuous flow, but real column
+    // breaks leave gaps (e.g. a title+image block that will not split).
+    // Those gaps push the tail of the page into a hidden 4th column, which
+    // is then clipped by the container. A fixed-height multicol box reports
+    // that spill as scrollWidth > clientWidth, so the split logic can see it.
     this.el = document.createElement("div");
     Object.assign(this.el.style, {
       position: "absolute",
       top: "-9999px",
       left: "-9999px",
-      width: `${columnWidth}px`,
+      width: `${containerWidth}px`,
+      // Slack absorbs sub-pixel and React-vs-string markup differences
+      // without visibly wasting space. If this is too small, the last line or
+      // two spill into a hidden 4th column; 24px per column is ~1.3 lines.
+      height: `${Math.max(0, pageHeight - 24)}px`,
+      columnCount: "3",
+      columnGap: `${columnGap}px`,
+      columnFill: "auto",
+      overflow: "hidden",
       fontFamily: '"Special Elite", system-ui, sans-serif',
       fontSize: "12px",
       lineHeight: "1.625",
@@ -157,7 +163,7 @@ class PageMeasurer {
   }
 
   get overflows(): boolean {
-    return this.el.scrollHeight > this.capacity + 2;
+    return this.el.scrollWidth > this.el.clientWidth + 1;
   }
 
   setContent(html: string): void {

@@ -40,7 +40,10 @@ export function PostArticle({
   const showImage = Boolean(featuredImage) && !continuedFromTitle;
 
   return (
-    <article className="space-y-1 border-b border-black dark:border-[#f5ecd8] pb-3 text-xs leading-relaxed last:border-b-0">
+    <article
+      data-post-id={postId}
+      className="space-y-1 border-b border-black dark:border-[#f5ecd8] pb-3 text-xs leading-relaxed last:border-b-0"
+    >
       {continuedFromTitle ? (
         <div className="continued-from-tag">
           Continued from &ldquo;{continuedFromTitle}&rdquo;
