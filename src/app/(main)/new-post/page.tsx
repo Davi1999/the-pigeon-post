@@ -28,8 +28,8 @@ export default async function NewPostPage() {
             Write a new post
           </h1>
           <p className="text-sm text-gray-500">
-            Share a long-form dispatch with your friends. Plain text only, up to
-            10,000 characters.
+            Share a long-form dispatch with your friends. Plain text body up to
+            10,000 characters, plus an optional featured image.
           </p>
         </header>
 

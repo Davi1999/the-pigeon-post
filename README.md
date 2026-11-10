@@ -16,6 +16,23 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Featured images
+
+Featured images are stored in Supabase Storage and are optional per post.
+
+1. Copy `.env.example` to `.env.local` and fill in:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY` (server-only; never expose this to the client)
+2. Apply `supabase/migrations/20260310142911_new-migration.sql` to create the
+   public-read `post-images` bucket. Writes go through the server-side
+   service-role client, so no client upload policies are needed.
+3. Set both variables in Vercel for deployed environments.
+
+Uploads are limited to JPEG, PNG, and WebP, and images are downscaled and
+re-encoded in the browser before upload. Without the environment variables,
+image uploads return a clear "not configured" error while posts without
+images keep working.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

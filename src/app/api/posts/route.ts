@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { posts } from "@/db/schema";
 import { getFeedPostsPage } from "@/lib/feed";
+import { isPostImageOwnedByUser } from "@/lib/postImages";
 
 export async function GET(request: Request) {
   const session = await auth.api.getSession({
@@ -107,9 +108,33 @@ export async function POST(request: Request) {
     );
   }
 
+  const rawFeaturedImagePath = (body as { featuredImagePath?: unknown })
+    .featuredImagePath;
+
+  let featuredImagePath: string | null = null;
+
+  if (
+    rawFeaturedImagePath !== undefined &&
+    rawFeaturedImagePath !== null &&
+    rawFeaturedImagePath !== ""
+  ) {
+    if (
+      typeof rawFeaturedImagePath !== "string" ||
+      !isPostImageOwnedByUser(rawFeaturedImagePath, session.user.id)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid featured image." },
+        { status: 400 },
+      );
+    }
+
+    featuredImagePath = rawFeaturedImagePath;
+  }
+
   const combinedContent = JSON.stringify({
     title,
     body: contentBody,
+    ...(featuredImagePath ? { featuredImagePath } : {}),
   });
 
   try {

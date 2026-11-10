@@ -17,6 +17,7 @@ export type PageItem = {
   postId: string;
   title: string;
   bodyText: string;
+  featuredImage: string | null;
   authorDisplayName: string;
   createdAt: string;
   isOwnPost: boolean;
@@ -91,6 +92,14 @@ function buildArticleHtml(item: PageItem, chrome: LayoutChrome): string {
     ? `<p style="margin:4px 0 0;white-space:pre-wrap;font-size:11px;color:${bodyColor};text-align:justify;line-height:1.625;">${body}</p>`
     : "";
 
+  // Fixed aspect ratio + max-height keeps the measured height deterministic
+  // (independent of the image's intrinsic size or load state) so pagination
+  // never shifts. Only the first chunk of an article shows the image.
+  const imageHtml =
+    !item.isContinuation && item.featuredImage
+      ? `<img src="${escapeHtml(item.featuredImage)}" alt="${title}" loading="lazy" decoding="async" style="display:block;width:100%;height:auto;aspect-ratio:16/9;max-height:420px;object-fit:cover;border:1px solid ${borderColor};margin:14px 0 0;box-sizing:border-box;" />`
+      : "";
+
   const tailHtml = chrome.showContinueBlock ? continueConversationBlockHtml() : "";
 
   if (item.isContinuation) {
@@ -114,6 +123,7 @@ function buildArticleHtml(item: PageItem, chrome: LayoutChrome): string {
     `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.025em;color:${mutedColor};text-align:center;padding:8px;margin:0;">${byline}</p>`,
     `<div style="height:1px;width:32px;background:${borderColor};"></div>`,
     "</div>",
+    imageHtml,
     "</div>",
     bodyHtml,
     tailHtml,
@@ -227,6 +237,7 @@ function splitBody(
     postId: post.id,
     title: post.title,
     bodyText: "",
+    featuredImage: post.featuredImage,
     authorDisplayName: post.authorDisplayName,
     createdAt: post.createdAt,
     isOwnPost: post.isOwnPost,
@@ -348,6 +359,7 @@ export function computeNewspaperLayout(
           postId: post.id,
           title: post.title,
           bodyText: contBody,
+          featuredImage: post.featuredImage,
           authorDisplayName: post.authorDisplayName,
           createdAt: post.createdAt,
           isOwnPost: post.isOwnPost,
@@ -399,6 +411,7 @@ export function computeNewspaperLayout(
           postId: post.id,
           title: post.title,
           bodyText: post.body,
+          featuredImage: post.featuredImage,
           authorDisplayName: post.authorDisplayName,
           createdAt: post.createdAt,
           isOwnPost: post.isOwnPost,

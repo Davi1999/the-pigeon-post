@@ -24,6 +24,7 @@ export type FeedPostSerialized = {
   id: string;
   title: string;
   body: string;
+  featuredImage: string | null;
   authorDisplayName: string;
   createdAt: string;
   isOwnPost: boolean;
@@ -281,6 +282,7 @@ export function DashboardFeed({
                 postId={item.postId}
                 title={item.title}
                 body={item.bodyText}
+                featuredImage={item.featuredImage}
                 authorDisplayName={item.authorDisplayName}
                 createdAt={new Date(item.createdAt)}
                 isOwnPost={item.isOwnPost}
@@ -372,6 +374,7 @@ export function DashboardFeed({
           postId={post.id}
           title={post.title}
           body={post.body}
+          featuredImage={post.featuredImage}
           authorDisplayName={post.authorDisplayName}
           createdAt={new Date(post.createdAt)}
           isOwnPost={post.isOwnPost}
