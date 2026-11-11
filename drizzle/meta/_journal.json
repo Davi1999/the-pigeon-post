@@ -43,6 +43,13 @@
       "when": 1794422744936,
       "tag": "0005_add_email_notifications_update",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794423270032,
+      "tag": "0006_add_issue_3_2_update",
+      "breakpoints": true
     }
   ]
 }
