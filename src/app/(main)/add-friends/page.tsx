@@ -1,12 +1,14 @@
 // src/app/(main)/add-friends/page.tsx
 
 import { auth } from "@/lib/auth";
+import { sendFriendRequestNotificationEmail } from "@/lib/email";
 import { db } from "@/lib/db";
 import { friendRequests } from "@/db/schema";
 import { user as userTable } from "@/db/auth-schema";
 import { and, eq, inArray, or } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 
 const ADD_FRIENDS_PATH = "/add-friends";
 
@@ -85,6 +87,25 @@ export async function sendFriendRequest(formData: FormData) {
     );
   }
 
+  const queueFriendRequestNotification = () => {
+    after(async () => {
+      try {
+        await sendFriendRequestNotificationEmail({
+          to: targetUser.email,
+          recipientName: targetUser.name,
+          senderName:
+            session.user.name?.trim() || session.user.email || "Someone",
+          senderEmail: session.user.email ?? "",
+        });
+      } catch (error) {
+        console.error(
+          "Error sending friend request notification email:",
+          error,
+        );
+      }
+    });
+  };
+
   // Check existing relationship / requests in either direction
   const existingRequests = await db
     .select({
@@ -137,6 +158,8 @@ export async function sendFriendRequest(formData: FormData) {
       .set({ status: "pending" })
       .where(eq(friendRequests.id, existing.id));
 
+    queueFriendRequestNotification();
+
     redirect(
       `${ADD_FRIENDS_PATH}?status=success&message=${encodeURIComponent(
         "Friend request sent again.",
@@ -150,6 +173,8 @@ export async function sendFriendRequest(formData: FormData) {
     receiverId: targetUser.id,
     status: "pending",
   });
+
+  queueFriendRequestNotification();
 
   redirect(
     `${ADD_FRIENDS_PATH}?status=success&message=${encodeURIComponent(
