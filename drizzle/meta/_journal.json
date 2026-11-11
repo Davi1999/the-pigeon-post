@@ -36,6 +36,13 @@
       "when": 1794346890624,
       "tag": "0004_harden_public_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794422744936,
+      "tag": "0005_add_email_notifications_update",
+      "breakpoints": true
     }
   ]
 }
