@@ -70,6 +70,51 @@ function encodeCursor(createdAt: Date, id: string): string {
   return `${createdAt.toISOString()}:${id}`;
 }
 
+export type PostNotificationDetails = {
+  id: string;
+  title: string;
+  authorId: string;
+  authorName: string | null;
+  authorEmail: string;
+};
+
+/**
+ * Loads the post author's contact details for notification emails.
+ * Kept separate from `getPostForUser` so author emails are never serialized
+ * into props passed to client components.
+ */
+export async function getPostNotificationDetails(
+  postId: string,
+): Promise<PostNotificationDetails | null> {
+  const [post] =
+    (await db
+      .select({
+        id: posts.id,
+        content: posts.content,
+        authorId: posts.authorId,
+        authorName: userTable.name,
+        authorEmail: userTable.email,
+      })
+      .from(posts)
+      .innerJoin(userTable, eq(posts.authorId, userTable.id))
+      .where(eq(posts.id, postId))
+      .limit(1)) ?? [];
+
+  if (!post) {
+    return null;
+  }
+
+  const { title } = parsePostContent(post.content);
+
+  return {
+    id: post.id,
+    title,
+    authorId: post.authorId,
+    authorName: post.authorName,
+    authorEmail: post.authorEmail,
+  };
+}
+
 export type GetFeedPostsPageOptions = {
   limit?: number;
   cursor?: string | null;

@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { comments } from "@/db/schema";
-import { getPostForUser } from "@/lib/feed";
+import { getPostForUser, getPostNotificationDetails } from "@/lib/feed";
+import { sendReplyNotificationEmail } from "@/lib/email";
 import type { PostComment } from "@/lib/comments";
 
 export async function POST(request: Request) {
@@ -142,6 +143,35 @@ export async function POST(request: Request) {
       authorDisplayName: "You",
       replySnippet,
     };
+
+    // Let the post author know, unless they are the one commenting. This runs
+    // after the response is sent so Resend latency never blocks publishing.
+    if (!post.isOwnPost) {
+      const commenterName = session.user.name?.trim() || "Someone";
+      const isReplyToComment = inserted.parentId != null;
+
+      after(async () => {
+        try {
+          const details = await getPostNotificationDetails(postId);
+
+          if (!details || details.authorId === session.user.id) {
+            return;
+          }
+
+          await sendReplyNotificationEmail({
+            to: details.authorEmail,
+            recipientName: details.authorName,
+            postId,
+            postTitle: post.title || details.title,
+            commenterName,
+            commentContent: trimmedContent,
+            isReplyToComment,
+          });
+        } catch (error) {
+          console.error("Error sending reply notification email:", error);
+        }
+      });
+    }
 
     return NextResponse.json(responseComment, { status: 201 });
   } catch (error) {
