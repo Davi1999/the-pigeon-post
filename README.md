@@ -33,6 +33,28 @@ re-encoded in the browser before upload. Without the environment variables,
 image uploads return a clear "not configured" error while posts without
 images keep working.
 
+## Reply notification emails (Resend)
+
+When someone comments on a post, the post's author receives an email through
+[Resend](https://resend.com). The email is sent after the comment response, so
+a Resend failure never blocks publishing. If `RESEND_API_KEY` is not set, the
+feature is silently disabled.
+
+1. Create a free Resend account and add an API key under **API Keys**.
+2. Add a domain under **Domains** and create the DNS records Resend shows.
+   The free plan only lets you send to arbitrary recipients from a verified
+   domain. With the default `onboarding@resend.dev` sender, Resend only
+   delivers to the email address that owns the Resend account.
+3. Set these variables locally in `.env.local` and in Vercel:
+   - `RESEND_API_KEY` — server-only API key (`re_...`).
+   - `EMAIL_FROM` — a sender on your verified domain, e.g.
+     `The Pigeon Post <notifications@your-domain.com>`.
+   - `NEXT_PUBLIC_APP_URL` — the public origin used in the email link, e.g.
+     `https://your-domain.com`.
+
+The free plan includes 3,000 emails per month with a limit of 100 per day and
+2 requests per second. No database changes are required.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 ## Database migrations
