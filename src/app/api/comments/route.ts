@@ -5,8 +5,12 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { comments } from "@/db/schema";
+import { user as userTable } from "@/db/auth-schema";
 import { getPostForUser, getPostNotificationDetails } from "@/lib/feed";
-import { sendReplyNotificationEmail } from "@/lib/email";
+import {
+  sendCommentReplyNotificationEmail,
+  sendReplyNotificationEmail,
+} from "@/lib/email";
 import type { PostComment } from "@/lib/comments";
 
 export async function POST(request: Request) {
@@ -108,16 +112,28 @@ export async function POST(request: Request) {
       });
 
     let replySnippet: string | null = null;
+    let parentComment: {
+      authorId: string;
+      authorName: string | null;
+      authorEmail: string;
+      content: string;
+    } | null = null;
+
     if (inserted.parentId) {
       const [parent] = await db
         .select({
+          authorId: comments.authorId,
+          authorName: userTable.name,
+          authorEmail: userTable.email,
           content: comments.content,
         })
         .from(comments)
+        .innerJoin(userTable, eq(comments.authorId, userTable.id))
         .where(eq(comments.id, inserted.parentId))
         .limit(1);
 
-      if (parent?.content) {
+      if (parent) {
+        parentComment = parent;
         const snippet = parent.content.slice(0, 20);
         replySnippet =
           snippet.length < parent.content.length ? `${snippet}…` : snippet;
@@ -134,9 +150,14 @@ export async function POST(request: Request) {
       replySnippet,
     };
 
-    // Let the post author know, unless they are the one commenting. This runs
-    // after the response is sent so Resend latency never blocks publishing.
-    if (!post.isOwnPost) {
+    // Notify the post author and/or the author of the comment being replied
+    // to. This runs after the response is sent so Resend latency never blocks
+    // publishing.
+    const shouldNotifyPostAuthor = !post.isOwnPost;
+    const shouldNotifyParentAuthor =
+      parentComment != null && parentComment.authorId !== session.user.id;
+
+    if (shouldNotifyPostAuthor || shouldNotifyParentAuthor) {
       const commenterName = session.user.name?.trim() || "Someone";
       const isReplyToComment = inserted.parentId != null;
 
@@ -144,21 +165,43 @@ export async function POST(request: Request) {
         try {
           const details = await getPostNotificationDetails(postId);
 
-          if (!details || details.authorId === session.user.id) {
+          if (!details) {
             return;
           }
 
-          await sendReplyNotificationEmail({
-            to: details.authorEmail,
-            recipientName: details.authorName,
-            postId,
-            postTitle: post.title || details.title,
-            commenterName,
-            commentContent: trimmedContent,
-            isReplyToComment,
-          });
+          const postTitle = post.title || details.title;
+
+          if (details.authorId !== session.user.id) {
+            await sendReplyNotificationEmail({
+              to: details.authorEmail,
+              recipientName: details.authorName,
+              postId,
+              postTitle,
+              commenterName,
+              commentContent: trimmedContent,
+              isReplyToComment,
+            });
+          }
+
+          // The post author already received the email above, so only notify
+          // the parent comment author when they are a different person.
+          if (
+            parentComment &&
+            parentComment.authorId !== session.user.id &&
+            parentComment.authorId !== details.authorId
+          ) {
+            await sendCommentReplyNotificationEmail({
+              to: parentComment.authorEmail,
+              recipientName: parentComment.authorName,
+              postId,
+              postTitle,
+              commenterName,
+              commentContent: trimmedContent,
+              originalCommentContent: parentComment.content,
+            });
+          }
         } catch (error) {
-          console.error("Error sending reply notification email:", error);
+          console.error("Error sending comment notification email:", error);
         }
       });
     }

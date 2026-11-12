@@ -37,6 +37,16 @@ export type FriendRequestNotificationEmail = {
   senderEmail: string;
 };
 
+export type CommentReplyNotificationEmail = {
+  to: string;
+  recipientName: string | null;
+  postId: string;
+  postTitle: string;
+  commenterName: string;
+  commentContent: string;
+  originalCommentContent: string;
+};
+
 type EmailLayoutInput = {
   heading: string;
   contentHtml: string;
@@ -255,6 +265,93 @@ export async function sendReplyNotificationEmail(
     `Read the story: ${postUrl}`,
     "",
     `You are receiving this because you wrote "${safeTitle}" on The Pigeon Post.`,
+  ].join("\n");
+
+  return sendEmail({ to, subject, html, text });
+}
+
+/**
+ * Emails the author of a comment when somebody replies directly to it.
+ */
+export async function sendCommentReplyNotificationEmail(
+  notification: CommentReplyNotificationEmail,
+): Promise<string | null> {
+  const {
+    to,
+    recipientName,
+    postId,
+    postTitle,
+    commenterName,
+    commentContent,
+    originalCommentContent,
+  } = notification;
+
+  const safeTitle = postTitle.trim() || "a story";
+  const greeting = recipientName?.trim() || "there";
+  const postUrl = `${getAppUrl()}/post/${postId}`;
+  const subject = `${commenterName} replied to your comment on "${truncate(
+    safeTitle,
+    60,
+  )}"`;
+
+  const quoteLabel = (label: string, extraTop = false) =>
+    `<p style="margin:${extraTop ? "18px" : "0"} 0 6px;font-family:${MONO_FONT};font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#4a4437;">${label}</p>`;
+
+  const contentHtml = `
+    <p style="margin:0 0 14px;font-size:16px;line-height:1.6;">Dear ${escapeHtml(
+      greeting,
+    )},</p>
+    <p style="margin:0 0 20px;font-size:16px;line-height:1.6;">
+      <strong>${escapeHtml(
+        commenterName,
+      )}</strong> replied to your comment on
+      <strong>&ldquo;${escapeHtml(safeTitle)}&rdquo;</strong>.
+    </p>
+    ${quoteLabel("Your comment")}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-left:3px solid #161616;background-color:#efe4cf;">
+      <tr>
+        <td style="padding:14px 18px;font-size:15px;line-height:1.6;font-style:italic;">${formatMultiline(
+          originalCommentContent,
+        )}</td>
+      </tr>
+    </table>
+    ${quoteLabel("Their reply", true)}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-left:3px solid #161616;background-color:#efe4cf;">
+      <tr>
+        <td style="padding:14px 18px;font-size:15px;line-height:1.6;font-style:italic;">${formatMultiline(
+          commentContent,
+        )}</td>
+      </tr>
+    </table>`;
+
+  const html = renderEmailLayout({
+    heading: "A new reply to your comment",
+    contentHtml,
+    ctaLabel: "Read the reply",
+    ctaUrl: postUrl,
+    footerHtml: `You are receiving this because you commented on &ldquo;${escapeHtml(
+      safeTitle,
+    )}&rdquo; on The Pigeon Post. <a href="${escapeHtml(
+      postUrl,
+    )}" style="color:#4a4437;">View the discussion</a>.`,
+  });
+
+  const text = [
+    "A new reply to your comment has arrived at The Pigeon Post.",
+    "",
+    `Dear ${greeting},`,
+    "",
+    `${commenterName} replied to your comment on "${safeTitle}".`,
+    "",
+    "Your comment:",
+    truncate(originalCommentContent, 600),
+    "",
+    "Their reply:",
+    truncate(commentContent, 600),
+    "",
+    `Read the reply: ${postUrl}`,
+    "",
+    `You are receiving this because you commented on "${safeTitle}" on The Pigeon Post.`,
   ].join("\n");
 
   return sendEmail({ to, subject, html, text });
