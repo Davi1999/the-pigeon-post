@@ -15,10 +15,9 @@ import {
 
 interface NewPostFormProps {
   authorName: string;
-  maxLength: number;
 }
 
-export default function NewPostForm({ authorName, maxLength }: NewPostFormProps) {
+export default function NewPostForm({ authorName }: NewPostFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -33,8 +32,6 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
   /** Reuses an already-uploaded file when retrying a failed post creation. */
   const uploadedImageRef = useRef<{ file: File; path: string } | null>(null);
   const previewUrlRef = useRef<string | null>(null);
-
-  const remaining = maxLength - body.length;
 
   // Revoke the last object URL when the form unmounts.
   useEffect(() => {
@@ -149,11 +146,6 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
 
     if (!trimmedBody) {
       setError("Body is required.");
-      return;
-    }
-
-    if (trimmedBody.length > maxLength) {
-      setError(`Body must be at most ${maxLength.toLocaleString()} characters.`);
       return;
     }
 
@@ -284,27 +276,15 @@ export default function NewPostForm({ authorName, maxLength }: NewPostFormProps)
           id="body"
           name="body"
           rows={12}
-          maxLength={maxLength}
           required
           value={body}
           onChange={(event) => setBody(event.target.value)}
           className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-foreground shadow-sm placeholder:text-muted-soft focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground dark:border-foreground/40 dark:bg-foreground/5"
           placeholder="Write your dispatch here. Plain text only."
         />
-        <div className="flex items-center justify-between text-xs text-muted">
-          <span>
-            {body.length.toLocaleString()} / {maxLength.toLocaleString()} characters
-          </span>
-          <span
-            className={
-              remaining <= Math.floor(maxLength * 0.1)
-                ? "font-medium text-red-600 dark:text-red-400"
-                : "text-muted-soft"
-            }
-          >
-            {remaining.toLocaleString()} characters remaining
-          </span>
-        </div>
+        <p className="text-xs text-muted-soft">
+          {body.length.toLocaleString()} characters
+        </p>
       </div>
 
       <div className="flex items-center justify-end gap-3">

@@ -28,14 +28,13 @@ export default async function NewPostPage() {
             Write a new post
           </h1>
           <p className="text-sm text-muted">
-            Share a long-form dispatch with your friends. Plain text body up to
-            10,000 characters, plus an optional featured image.
+            Share a long-form dispatch with your friends. Plain text body, plus
+            an optional featured image.
           </p>
         </header>
 
         <NewPostForm
           authorName={session.user.name ?? session.user.email ?? "You"}
-          maxLength={10000}
         />
       </div>
     </div>

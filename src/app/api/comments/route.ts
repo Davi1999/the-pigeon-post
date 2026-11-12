@@ -70,16 +70,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const MAX_LENGTH = 5_000;
-  if (trimmedContent.length > MAX_LENGTH) {
-    return NextResponse.json(
-      {
-        error: `Comment must be at most ${MAX_LENGTH.toLocaleString()} characters.`,
-      },
-      { status: 400 },
-    );
-  }
-
   let parentIdValue: string | null = null;
   if (parentId != null) {
     if (typeof parentId !== "string" || !parentId.trim()) {

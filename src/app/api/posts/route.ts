@@ -97,17 +97,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const MAX_LENGTH = 10_000;
-
-  if (contentBody.length > MAX_LENGTH) {
-    return NextResponse.json(
-      {
-        error: `Body must be at most ${MAX_LENGTH.toLocaleString()} characters.`,
-      },
-      { status: 400 },
-    );
-  }
-
   const rawFeaturedImagePath = (body as { featuredImagePath?: unknown })
     .featuredImagePath;
 
